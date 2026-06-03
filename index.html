@@ -6,14 +6,37 @@
 <title>java</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#141416;--surface:#1c1c1e;--card:#242426;--card-h:#2e2e30;
-  --border:rgba(255,255,255,.06);--fg:#f5f5f7;--muted:#6e6e73;
-  --accent:#64d2ff;--red:#ff453a;--green:#30d158;
-  --sidebar-w:210px;--radius:14px;--radius-sm:10px;
+:root {
+  --bg: #141416; --surface: #1c1c1e; --card: #242426; --card-h: #2e2e30;
+  --border: rgba(255,255,255,.06); --fg: #f5f5f7; --muted: #6e6e73;
+  --accent: #64d2ff; --red: #ff453a; --green: #30d158;
+  --sidebar-w: 210px; --radius: 14px; --radius-sm: 10px;
 }
+
+/* Theme overrides */
+body.theme-light {
+  --bg: #f5f5f7; --surface: #ffffff; --card: #f0f0f2; --card-h: #e5e5ea;
+  --border: rgba(0,0,0,.08); --fg: #1d1d1f; --muted: #86868b; --accent: #0071e3;
+}
+body.theme-oled {
+  --bg: #000000; --surface: #111111; --card: #1c1c1c; --card-h: #2c2c2c;
+  --border: rgba(255,255,255,.04); --fg: #ffffff; --muted: #8e8e93; --accent: #bf5af2;
+}
+body.theme-emerald {
+  --bg: #0d1b15; --surface: #142d22; --card: #1d3f30; --card-h: #25523e;
+  --border: rgba(255,255,255,.05); --fg: #f5f5f7; --muted: #6e857b; --accent: #30d158;
+}
+body.theme-cyberpunk {
+  --bg: #1a0f2e; --surface: #2d1b4e; --card: #3e246c; --card-h: #4e2e88;
+  --border: rgba(255,255,255,.08); --fg: #f5f5f7; --muted: #8f7da8; --accent: #f035a0;
+}
+body.theme-rosegold {
+  --bg: #1f1a1d; --surface: #2e252a; --card: #3d3038; --card-h: #4f3f4a;
+  --border: rgba(255,255,255,.06); --fg: #fff0f5; --muted: #a38f9b; --accent: #ffb7c5;
+}
+
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:var(--bg);color:var(--fg)}
+html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:var(--bg);color:var(--fg);transition:background 0.2s,color 0.2s}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 
 /* ─── App Shell ─── */
@@ -80,23 +103,16 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .clk-time{font-size:66px;font-weight:800;letter-spacing:-3px;line-height:1}
 .clk-ampm{font-size:18px;font-weight:600;color:var(--muted);letter-spacing:1px}
 .clk-date{font-size:14px;color:var(--muted);margin-top:6px;font-weight:500}
-.bat-wrap{
-  display:flex;align-items:center;gap:10px;margin-top:24px;
-  padding:9px 18px;background:var(--surface);border-radius:50px;border:1px solid var(--border);
-}
-.bat-wrap svg{width:26px;height:26px}
-.bat-pct{font-size:16px;font-weight:700}
-.bat-st{font-size:10px;color:var(--muted);font-weight:500}
 .home-info{margin-top:16px;font-size:12px;color:var(--muted);font-weight:500;line-height:1.6}
 
 /* Active sessions on homepage */
-.hp-search-container{margin-top:16px;width:100%;max-width:380px}
+.hp-search-container{margin-top:24px;width:100%;max-width:380px}
 #active-sessions-section{display:none;width:100%;max-width:380px;margin-top:20px;text-align:left}
 .act-sess-row{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-bottom:1px solid var(--border);gap:8px}
 .act-sess-row:last-child{border-bottom:none}
 .act-sess-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.act-sess-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
 .act-sess-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-sess-sub{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .act-sess-btns{display:flex;gap:6px;flex-shrink:0}
 
 /* ─── Games ─── */
@@ -124,64 +140,75 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .gm-btn:active{transform:scale(.97);transition:transform .08s}
 .gm-btn:focus-visible{box-shadow:0 0 0 3px var(--accent)}
 .gm-btn span{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
-.gm-btn .active-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
 
-/* ─── Settings ─── */
-.set-sec{margin-bottom:20px}
-.set-sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
-.set-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);gap:10px}
-.set-row:last-child{border-bottom:none}
-.set-lbl{font-size:12.5px;font-weight:600;flex:1;min-width:0}
-.set-sub{font-size:10.5px;color:var(--muted);margin-top:2px;font-weight:400}
-.set-acts{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
-.s-b{
-  padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);
-  color:var(--fg);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;
-  transition:all .15s;white-space:nowrap;
+/* ─── Settings categorizations (Tab System) ─── */
+.set-tabs {
+  display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--border);
+  padding-bottom:8px;overflow-x:auto;scrollbar-width:none;
 }
-.s-b:hover{background:var(--card-h)}
-.s-b:active{transform:scale(.96)}
-.s-b.dng{border-color:rgba(255,69,58,.3);color:var(--red)}
-.s-b.dng:hover{background:rgba(255,69,58,.1)}
-.s-b.acc{border-color:rgba(100,210,255,.3);color:var(--accent)}
-.s-b.acc:hover{background:rgba(100,210,255,.08)}
-.fh{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
-.bg-prev{width:100%;height:80px;border-radius:8px;object-fit:cover;margin-top:6px;background:var(--card);display:none}
-.bg-prev.on{display:block}
-.stor-bar{height:3px;background:var(--card);border-radius:2px;overflow:hidden;margin-top:5px}
-.stor-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.set-tabs::-webkit-scrollbar{display:none}
+.set-tab-btn {
+  background:none;border:none;color:var(--muted);font-size:12px;font-weight:700;
+  padding:6px 12px;cursor:pointer;border-radius:8px;transition:all .15s;white-space:nowrap;
+  font-family:inherit;
+}
+.set-tab-btn:hover{color:var(--fg);background:rgba(255,255,255,0.03)}
+.set-tab-btn.active{color:var(--accent);background:rgba(100,210,255,0.12)}
+.set-pane{display:none}
+.set-pane.on{display:block}
 
-/* ─── Game View ─── */
+/* ─── Game View & Virtual Browser Nav ─── */
 #game-view{
   position:fixed;inset:0;z-index:100;background:#000;
   opacity:0;transform:scale(1.02);transition:opacity .3s,transform .3s;pointer-events:none;
+  display:flex;flex-direction:column;
 }
 #game-view.on{opacity:1;transform:scale(1);pointer-events:all}
-#game-container{width:100%;height:100%;position:relative;background:#000}
-.game-frame{width:100%;height:100%;border:none;background:#000}
 
-#back-btn{
-  position:fixed;top:max(env(safe-area-inset-top,0px),8px);left:max(env(safe-area-inset-left,0px),8px);z-index:115;
-  background:rgba(28,28,30,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 14px;border-radius:50px;
-  font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;
-  display:flex;align-items:center;gap:4px;transition:all .2s;opacity:0;pointer-events:none;
+#browser-nav {
+  height:44px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:none;align-items:center;padding:0 8px;gap:6px;z-index:120;
 }
-#back-btn.on{opacity:1;pointer-events:all}
-#back-btn:hover{background:rgba(48,48,50,.92)}
-#back-btn:active{transform:scale(.93)}
-#back-btn svg{width:13px;height:13px}
+#browser-nav.on{display:flex}
+.nav-addr-w{position:relative;flex:1;display:flex;align-items:center}
+#browser-url{
+  width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  color:var(--fg);padding:6px 10px;padding-right:30px;font-size:11.5px;font-family:inherit;outline:none;
+}
+#browser-url:focus{border-color:var(--accent)}
+#browser-nav .nav-loader{position:absolute;right:10px;width:12px;height:12px;border-width:2px;display:none}
 
-#fs-btn{
-  position:fixed;top:max(env(safe-area-inset-top,0px),8px);right:max(env(safe-area-inset-right,0px),8px);z-index:115;
+#game-container{flex:1;position:relative;background:#000;width:100%;height:100%;transition:transform 0.3s cubic-bezier(.4,0,.2,1)}
+.game-frame{width:100%;height:100%;border:none;background:#000;position:absolute;inset:0;display:none}
+
+/* Rotation Viewport Handler */
+#game-container.rotated {
+  transform: rotate(90deg);
+  transform-origin: center;
+  width: 100vh !important;
+  height: 100vw !important;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* Control buttons inside sessions */
+.session-btn {
+  position:fixed;top:max(env(safe-area-inset-top,0px),8px);z-index:125;
   background:rgba(28,28,30,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 12px;border-radius:50px;
   font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;
   display:flex;align-items:center;gap:4px;transition:all .2s;opacity:0;pointer-events:none;
 }
-#fs-btn.on{opacity:1;pointer-events:all}
-#fs-btn svg{width:14px;height:14px}
+.session-btn.on{opacity:1;pointer-events:all}
+.session-btn:hover{background:rgba(48,48,50,.92)}
+.session-btn:active{transform:scale(.93)}
+
+#back-btn{left:max(env(safe-area-inset-left,0px),8px)}
+#rotate-btn{left:max(calc(env(safe-area-inset-left,0px) + 76px),76px)}
+#fs-btn{right:max(env(safe-area-inset-right,0px),8px)}
+
+#back-btn svg, #rotate-btn svg, #fs-btn svg{width:13px;height:13px}
 
 /* ─── Virtual Cursor ─── */
 #virtual-cursor {
@@ -326,7 +353,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .tut-got{padding:10px 28px;border-radius:12px;background:var(--accent);color:#000;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;border:none}
 .tut-got:active{transform:scale(.96)}
 
-/* ─── Orientation Reminder ─── */
+/* ─── Rotate Reminder ─── */
 #rotate-reminder {
   position:fixed;inset:0;z-index:9999;background:#141416;
   display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;
@@ -413,11 +440,11 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 <nav id="sidebar">
   <div class="sb-head">
     <div class="sb-brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="6" width="20" height="12" rx="4"/>
         <line x1="7" y1="10" x2="7" y2="14"/><line x1="5" y1="12" x2="9" y2="12"/>
-        <circle cx="15.5" cy="10.5" r="1" fill="white" stroke="none"/>
-        <circle cx="18" cy="13" r="1" fill="white" stroke="none"/>
+        <circle cx="15.5" cy="10.5" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="18" cy="13" r="1" fill="currentColor" stroke="none"/>
       </svg>
       <span>java</span>
     </div>
@@ -468,21 +495,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 
         <!-- Active Sessions Panel -->
         <div id="active-sessions-section">
-          <div class="set-sec-t" style="margin-bottom:6px">Active Background Sessions</div>
+          <div class="set-sec-t" style="margin-bottom:6px">Active Sessions</div>
           <div class="set-card" id="active-sessions-list"></div>
         </div>
 
-        <div class="bat-wrap">
-          <svg viewBox="0 0 28 28" fill="none">
-            <rect x="2" y="7" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
-            <rect x="22" y="11" width="3" height="6" rx="1" fill="currentColor" opacity=".4"/>
-            <rect id="bat-fill" x="4.5" y="9.5" width="15" height="9" rx="1" fill="var(--green)"/>
-          </svg>
-          <div>
-            <div class="bat-pct" id="bat-pct">--%</div>
-            <div class="bat-st" id="bat-st">Checking...</div>
-          </div>
-        </div>
         <div class="home-info" id="home-info"></div>
       </div>
     </section>
@@ -500,59 +516,140 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 
     <!-- Settings -->
     <section class="page" id="page-settings">
-      <div class="set-sec">
-        <div class="set-sec-t">Appearance</div>
-        <div class="set-card">
-          <div class="set-row" style="flex-direction:column;align-items:flex-start">
-            <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-              <div><div class="set-lbl">Background Image</div><div class="set-sub">Set an image as the app background</div></div>
+      <div class="set-tabs">
+        <button class="set-tab-btn active" onclick="switchSetTab('general')">General</button>
+        <button class="set-tab-btn" onclick="switchSetTab('custom-games')">My Games</button>
+        <button class="set-tab-btn" onclick="switchSetTab('history')">History</button>
+        <button class="set-tab-btn" onclick="switchSetTab('data')">Data</button>
+        <button class="set-tab-btn" onclick="switchSetTab('experimental')">Experimental</button>
+      </div>
+
+      <!-- General Pane -->
+      <div class="set-pane on" id="pane-general">
+        <div class="set-sec">
+          <div class="set-sec-t">Theme Options</div>
+          <div class="set-card">
+            <div class="set-row">
+              <div><div class="set-lbl">Active Theme</div><div class="set-sub">Switch the interface style colors</div></div>
               <div class="set-acts">
-                <button class="s-b acc" onclick="document.getElementById('bg-fi').click()">Choose</button>
-                <button class="s-b dng" onclick="rmBg()">Remove</button>
+                <select id="theme-sel" onchange="changeTheme(this.value)" style="background:var(--card);border:1px solid var(--border);color:var(--fg);padding:6px;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600">
+                  <option value="dark">Default Dark</option>
+                  <option value="light">Light Theme</option>
+                  <option value="oled">Midnight OLED</option>
+                  <option value="emerald">Emerald Green</option>
+                  <option value="cyberpunk">Cyberpunk</option>
+                  <option value="rosegold">Rose Gold</option>
+                </select>
               </div>
             </div>
-            <img class="bg-prev" id="bg-prev" alt="">
-            <input type="file" id="bg-fi" class="fh" accept="image/*" onchange="handleBg(event)">
           </div>
         </div>
-      </div>
-      <div class="set-sec">
-        <div class="set-sec-t">Data</div>
-        <div class="set-card">
-          <div class="set-row">
-            <div><div class="set-lbl">Export All Data</div><div class="set-sub">Download settings, stats, controls, and stored data</div></div>
-            <div class="set-acts"><button class="s-b acc" onclick="expData()">Export</button></div>
-          </div>
-          <div class="set-row">
-            <div><div class="set-lbl">Import Data</div><div class="set-sub">Restore from a previously exported file</div></div>
-            <div class="set-acts"><button class="s-b" onclick="document.getElementById('imp-fi').click()">Import</button></div>
-            <input type="file" id="imp-fi" class="fh" accept=".json" onchange="impData(event)">
-          </div>
-          <div class="set-row">
-            <div><div class="set-lbl">Reset All Data</div><div class="set-sub">Permanently delete everything stored</div></div>
-            <div class="set-acts"><button class="s-b dng" onclick="confirmClear()">Clear All</button></div>
-          </div>
-        </div>
-      </div>
-      <div class="set-sec">
-        <div class="set-sec-t">Storage</div>
-        <div class="set-card">
-          <div class="set-row" style="flex-direction:column;align-items:flex-start">
-            <div style="display:flex;justify-content:space-between;width:100%">
-              <div class="set-lbl">Local Storage Used</div>
-              <div class="set-lbl" id="stor-size" style="color:var(--muted);font-weight:500">--</div>
+
+        <div class="set-sec">
+          <div class="set-sec-t">Appearance</div>
+          <div class="set-card">
+            <div class="set-row" style="flex-direction:column;align-items:flex-start">
+              <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+                <div><div class="set-lbl">Background Image</div><div class="set-sub">Set an image as the app background</div></div>
+                <div class="set-acts">
+                  <button class="s-b acc" onclick="document.getElementById('bg-fi').click()">Choose</button>
+                  <button class="s-b dng" onclick="rmBg()">Remove</button>
+                </div>
+              </div>
+              <img class="bg-prev" id="bg-prev" alt="">
+              <input type="file" id="bg-fi" class="fh" accept="image/*" onchange="handleBg(event)">
             </div>
-            <div class="stor-bar"><div class="stor-fill" id="stor-fill" style="width:0%"></div></div>
           </div>
         </div>
       </div>
-      <div class="set-sec">
-        <div class="set-sec-t">About</div>
-        <div class="set-card">
-          <div class="set-row"><div class="set-lbl">Version</div><div style="color:var(--muted);font-size:12px;font-weight:500">1.0.0</div></div>
-          <div class="set-row"><div class="set-lbl">Games</div><div style="color:var(--muted);font-size:12px;font-weight:500" id="set-gc">--</div></div>
-          <div class="set-row"><div class="set-lbl">WebGL</div><div style="color:var(--muted);font-size:12px;font-weight:500" id="set-wgl">--</div></div>
-          <div class="set-row"><div class="set-lbl">Total Visits</div><div style="color:var(--muted);font-size:12px;font-weight:500" id="set-vis">--</div></div>
+
+      <!-- Custom Games Pane -->
+      <div class="set-pane" id="pane-custom-games">
+        <div class="set-sec">
+          <div class="set-sec-t">Upload Custom HTML Game</div>
+          <div class="set-card" style="padding:14px">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <input type="text" id="cust-name-in" placeholder="Game Name" style="background:var(--bg);border:1px solid var(--border);padding:8px;border-radius:8px;color:var(--fg);font-family:inherit;font-size:12px">
+              <button class="s-b acc" onclick="document.getElementById('cust-file-in').click()" style="text-align:center">Choose .html File</button>
+              <input type="file" id="cust-file-in" accept=".html" class="fh" onchange="handleCustomUpload(event)">
+              <div id="cust-file-status" style="font-size:11px;color:var(--muted)">No file chosen</div>
+              <button class="s-b" onclick="saveCustomGame()" style="background:var(--accent);color:#000;font-weight:700">Add to Games Library</button>
+            </div>
+          </div>
+        </div>
+        <div class="set-sec">
+          <div class="set-sec-t">Uploaded Games</div>
+          <div class="set-card" id="custom-games-list"></div>
+        </div>
+      </div>
+
+      <!-- History Pane -->
+      <div class="set-pane" id="pane-history">
+        <div class="set-sec">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="set-sec-t">Recent Launched Sessions</div>
+            <button class="s-b dng" onclick="clearSessionHistory()" style="font-size:10px;padding:3px 8px">Clear History</button>
+          </div>
+          <div class="set-card" id="history-list-container" style="max-height:300px;overflow-y:auto"></div>
+        </div>
+      </div>
+
+      <!-- Data Pane -->
+      <div class="set-pane" id="pane-data">
+        <div class="set-sec">
+          <div class="set-sec-t">Data Operations</div>
+          <div class="set-card">
+            <div class="set-row">
+              <div><div class="set-lbl">Export All Data</div><div class="set-sub">Download complete settings, uploaded HTML games, and stats</div></div>
+              <div class="set-acts"><button class="s-b acc" onclick="expData()">Export</button></div>
+            </div>
+            <div class="set-row">
+              <div><div class="set-lbl">Import Data</div><div class="set-sub">Restore from a previously exported file</div></div>
+              <div class="set-acts"><button class="s-b" onclick="document.getElementById('imp-fi').click()">Import</button></div>
+              <input type="file" id="imp-fi" class="fh" accept=".json" onchange="impData(event)">
+            </div>
+            <div class="set-row">
+              <div><div class="set-lbl">Reset All Data</div><div class="set-sub">Permanently delete everything stored</div></div>
+              <div class="set-acts"><button class="s-b dng" onclick="confirmClear()">Clear All</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="set-sec">
+          <div class="set-sec-t">Storage</div>
+          <div class="set-card">
+            <div class="set-row" style="flex-direction:column;align-items:flex-start">
+              <div style="display:flex;justify-content:space-between;width:100%">
+                <div class="set-lbl">Local Storage Used</div>
+                <div class="set-lbl" id="stor-size" style="color:var(--muted);font-weight:500">--</div>
+              </div>
+              <div class="stor-bar"><div class="stor-fill" id="stor-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experimental Pane (AI Controls) -->
+      <div class="set-pane" id="pane-experimental">
+        <div class="set-sec">
+          <div class="set-sec-t">Experimental Features</div>
+          <div class="set-card">
+            <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                <div>
+                  <div class="set-lbl">AI Mobile Controls (BETA)</div>
+                  <div class="set-sub">Uses Pollinations AI to automatically construct mobile controller maps</div>
+                </div>
+                <label class="s-b" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <input type="checkbox" id="ai-toggle" onchange="toggleAI(this.checked)"> Enable
+                </label>
+              </div>
+            </div>
+            <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+              <div class="set-lbl">AI Secret Access Key</div>
+              <div class="set-sub" style="margin-bottom:6px">Stored in LocalStorage. Default setup is configured to operate immediately.</div>
+              <input type="password" id="ai-secret-key-input" onchange="saveAIKey(this.value)" placeholder="sk_..." style="background:var(--bg);border:1px solid var(--border);padding:8px;border-radius:8px;color:var(--fg);font-family:inherit;font-size:11px;width:100%">
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -567,10 +664,22 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 
 <!-- Game View -->
 <div id="game-view">
+  <div id="browser-nav">
+    <button class="s-b" onclick="browserNav('back')">←</button>
+    <button class="s-b" onclick="browserNav('forward')">→</button>
+    <button class="s-b" onclick="browserNav('refresh')">↻</button>
+    <div class="nav-addr-w">
+      <input type="text" id="browser-url" placeholder="Search Brave or enter URL..." onkeydown="if(event.key==='Enter') browserNav('navigate')">
+      <div class="spinner nav-loader" id="browser-loader"></div>
+    </div>
+  </div>
   <div id="game-container"></div>
 </div>
-<button id="back-btn" onclick="closeGame()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
-<button id="fs-btn" onclick="goFS()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+
+<!-- Session Buttons -->
+<button id="back-btn" class="session-btn" onclick="closeGame()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+<button id="rotate-btn" class="session-btn" onclick="toggleRotate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>Rotate</button>
+<button id="fs-btn" class="session-btn" onclick="goFS()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
 
 <!-- Virtual Cursor -->
 <div id="virtual-cursor"></div>
@@ -689,7 +798,6 @@ var KM = {
   Digit9:{key:'9',code:'Digit9',kc:57},Digit0:{key:'0',code:'Digit0',kc:48}
 };
 
-/* Display name for a key code */
 function kdisp(code) {
   var m = {Space:'Space',Enter:'Enter',ShiftLeft:'SHF',ShiftRight:'SHF',ControlLeft:'CTL',AltLeft:'ALT',Tab:'TAB',Escape:'ESC',Backspace:'DEL',ArrowUp:'Up',ArrowDown:'Down',ArrowLeft:'Left',ArrowRight:'Right'};
   if (m[code]) return m[code];
@@ -782,29 +890,80 @@ var G = {
     url: P + 'candycrush.html', base: P,
     mobile: true, btns: []
   },
-  'driftboss': {
-    name: 'Crossy Road',
-    url: P + 'driftboss.htm', base: P,
-    mobile: false, btns: []
+  'geometrydashlite': {
+    name: 'Geometry Dash Lite',
+    url: P + 'geometrydashlite.html', base: P,
+    mobile: false,
+    btns: [['Jump','Space']]
+  },
+  /* Newly Added Games from Offline Games Pack */
+  'slope': {
+    name: 'Slope',
+    url: P + 'slope.html', base: P,
+    mobile: false, btns: [['Left','ArrowLeft'],['Right','ArrowRight']]
+  },
+  'minecraft': {
+    name: 'Minecraft Classic',
+    url: P + 'minecraft.html', base: P,
+    mobile: false, btns: [['Build','KeyE'],['Break','KeyQ'],['Jump','Space']]
+  },
+  'retrobowl': {
+    name: 'Retro Bowl',
+    url: P + 'retrobowl.html', base: P,
+    mobile: false, btns: [['Action','Space'],['Up','KeyW'],['Down','KeyS']]
   },
   'cookieclicker': {
     name: 'Cookie Clicker',
     url: P + 'cookieclicker.htm', base: P,
     mobile: true, btns: []
   },
-  'geometrydashlite': {
-    name: 'Geometry Dash Lite',
-    url: P + 'geometrydashlite.html', base: P,
-    mobile: false,
-    btns: [['Jump','Space']]
+  'drivemad': {
+    name: 'Drive Mad',
+    url: P + 'drivemad.html', base: P,
+    mobile: false, btns: [['Drive','KeyW'],['Reverse','KeyS']]
+  },
+  'subwaysurfers': {
+    name: 'Subway Surfers',
+    url: P + 'subwaysurfers.html', base: P,
+    mobile: false, btns: [['Jump','ArrowUp'],['Duck','ArrowDown'],['Left','ArrowLeft'],['Right','ArrowRight']]
+  },
+  'tunnelrush': {
+    name: 'Tunnel Rush',
+    url: P + 'tunnelrush.html', base: P,
+    mobile: false, btns: [['Left','ArrowLeft'],['Right','ArrowRight']]
+  },
+  'ovo': {
+    name: 'OvO',
+    url: P + 'ovo.html', base: P,
+    mobile: false, btns: [['Jump','ArrowUp'],['Slide','ArrowDown']]
+  },
+  'fnaf': {
+    name: "Five Nights at Freddy's",
+    url: P + 'fnaf.html', base: P,
+    mobile: true, btns: []
+  },
+  'driftboss': {
+    name: 'Drift Boss',
+    url: P + 'driftboss.htm', base: P,
+    mobile: false, btns: [['Drift','Space']]
+  },
+  'tetris': {
+    name: 'Tetris',
+    url: P + 'tetris.html', base: P,
+    mobile: false, btns: [['Rotate','ArrowUp'],['Drop','Space'],['Hold','ShiftLeft']]
+  },
+  'pacman': {
+    name: 'Pacman',
+    url: P + 'pacman.html', base: P,
+    mobile: false, btns: [['Up','ArrowUp'],['Down','ArrowDown']]
   }
 };
 
 var GC = Object.keys(G).length;
-var activeGames = {}; // Key/value registry for persistent multi-tasking iframes
+var activeGames = {}; 
 
 /* ═══════════════════════════════════════════
-   Storage Helper
+   Storage & History Engine
    ═══════════════════════════════════════════ */
 var LS = {
   get: function(k, d) {
@@ -847,323 +1006,246 @@ var LS = {
   }
 };
 
-/* Cookie helpers for Shortcuts persistence */
-function setCookie(n, v, days) {
-  var d = new Date();
-  d.setTime(d.getTime() + days * 86400000);
-  document.cookie = n + '=' + encodeURIComponent(v) + ';expires=' + d.toUTCString() + ';SameSite=Lax;path=/';
+/* Session History Tracker */
+function addSessionHistory(name, type, value) {
+  var history = LS.get('history', []);
+  history.unshift({
+    name: name,
+    type: type,
+    value: value,
+    time: Date.now()
+  });
+  if (history.length > 50) history.pop(); // Keep last 50 launches
+  LS.set('history', history);
+  updateHistoryUI();
 }
-function getCookie(n) {
-  var m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)'));
-  return m ? decodeURIComponent(m[2]) : null;
+
+function clearSessionHistory() {
+  LS.set('history', []);
+  updateHistoryUI();
+  toast('History cleared.');
+}
+
+function updateHistoryUI() {
+  var container = document.getElementById('history-list-container');
+  container.innerHTML = '';
+  var history = LS.get('history', []);
+  if (history.length === 0) {
+    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No history items logged.</div>';
+    return;
+  }
+  history.forEach(function(item) {
+    var row = document.createElement('div');
+    row.className = 'set-row';
+    var d = new Date(item.time);
+    var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    var info = document.createElement('div');
+    var label = document.createElement('div');
+    label.className = 'set-lbl';
+    label.style.fontSize = '12px';
+    label.textContent = item.name;
+    var sub = document.createElement('div');
+    sub.className = 'set-sub';
+    sub.textContent = item.type.toUpperCase() + ' • ' + (item.value || '') + ' • ' + dateStr;
+    
+    info.appendChild(label);
+    info.appendChild(sub);
+    row.appendChild(info);
+    container.appendChild(row);
+  });
 }
 
 /* ═══════════════════════════════════════════
-   Visit Tracking
+   Custom HTML Game Uploader Engine
    ═══════════════════════════════════════════ */
+var tempCustomHTML = null;
+
+function handleCustomUpload(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(evt) {
+    tempCustomHTML = evt.target.result;
+    document.getElementById('cust-file-status').textContent = 'Loaded: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+  };
+  reader.readAsText(file);
+}
+
+function saveCustomGame() {
+  var name = document.getElementById('cust-name-in').value.trim();
+  if (!name) { toast('Please specify a game name.'); return; }
+  if (!tempCustomHTML) { toast('Please upload an HTML file first.'); return; }
+
+  var id = 'custom-' + Date.now();
+  var customGames = LS.get('custom_games', {});
+  customGames[id] = {
+    name: name,
+    html: tempCustomHTML,
+    id: id,
+    custom: true
+  };
+  LS.set('custom_games', customGames);
+  
+  // Reset inputs
+  document.getElementById('cust-name-in').value = '';
+  document.getElementById('cust-file-in').value = '';
+  document.getElementById('cust-file-status').textContent = 'No file chosen';
+  tempCustomHTML = null;
+
+  toast('Custom game "' + name + '" successfully added.');
+  rebuildGamesLibrary();
+  updateCustomGamesListUI();
+}
+
+function removeCustomGame(id) {
+  var customGames = LS.get('custom_games', {});
+  if (customGames[id]) {
+    var name = customGames[id].name;
+    delete customGames[id];
+    LS.set('custom_games', customGames);
+    toast('Removed "' + name + '" from library.');
+    rebuildGamesLibrary();
+    updateCustomGamesListUI();
+  }
+}
+
+function updateCustomGamesListUI() {
+  var container = document.getElementById('custom-games-list');
+  container.innerHTML = '';
+  var customGames = LS.get('custom_games', {});
+  var keys = Object.keys(customGames);
+  if (keys.length === 0) {
+    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">No custom games uploaded.</div>';
+    return;
+  }
+  keys.forEach(function(key) {
+    var g = customGames[key];
+    var row = document.createElement('div');
+    row.className = 'set-row';
+    
+    var info = document.createElement('div');
+    var label = document.createElement('div');
+    label.className = 'set-lbl';
+    label.textContent = g.name;
+    var sub = document.createElement('div');
+    sub.className = 'set-sub';
+    sub.textContent = 'Uploaded Game';
+    info.appendChild(label);
+    info.appendChild(sub);
+
+    var acts = document.createElement('div');
+    acts.className = 'set-acts';
+    var delBtn = document.createElement('button');
+    delBtn.className = 's-b dng';
+    delBtn.textContent = 'Remove';
+    delBtn.onclick = function() { removeCustomGame(key); };
+    
+    acts.appendChild(delBtn);
+    row.appendChild(info);
+    row.appendChild(acts);
+    container.appendChild(row);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   Theme Changer Engine
+   ═══════════════════════════════════════════ */
+function changeTheme(themeName) {
+  document.body.className = ''; // Reset body classes
+  if (themeName !== 'dark') {
+    document.body.classList.add('theme-' + themeName);
+  }
+  LS.set('theme', themeName);
+  document.getElementById('theme-sel').value = themeName;
+}
+
+// Set up initial theme loading
 (function() {
-  var v = LS.get('visits', { count: 0, first: null, last: null });
-  v.count++;
-  if (!v.first) v.first = Date.now();
-  v.last = Date.now();
-  LS.set('visits', v);
-  setCookie('java_visits', v.count, 365);
-  setCookie('java_last', Date.now(), 365);
+  var initialTheme = LS.get('theme', 'dark');
+  changeTheme(initialTheme);
 })();
 
 /* ═══════════════════════════════════════════
-   Entry Popup (Suppressed if visited > 2 times)
+   Settings Tab Navigation Switcher
+   ═══════════════════════════════════════════ */
+function switchSetTab(tabId) {
+  document.querySelectorAll('.set-tab-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('onclick').indexOf(tabId) !== -1);
+  });
+  document.querySelectorAll('.set-pane').forEach(function(pane) {
+    pane.classList.toggle('on', pane.id === 'pane-' + tabId);
+  });
+  if (tabId === 'history') updateHistoryUI();
+  if (tabId === 'custom-games') updateCustomGamesListUI();
+}
+
+/* ═══════════════════════════════════════════
+   Visits Tracking On Boarding setup
    ═══════════════════════════════════════════ */
 (function() {
   var v = LS.get('visits', { count: 1 });
-  if (v.count > 2) return; // Automatic suppression for active users
+  updateHomepageStats();
+})();
+
+/* ═══════════════════════════════════════════
+   Iframe Navigation Overlay Controller (Web Browser Session)
+   ═══════════════════════════════════════════ */
+var browserHistory = [];
+var browserHistoryIdx = -1;
+
+function browserNav(action) {
+  var iframe = document.getElementById('iframe-web-browser');
+  if (!iframe) return;
   
-  var el = document.getElementById('entry-pop');
-  document.getElementById('ep-title').textContent = v.count <= 1 ? 'Welcome to java' : 'Welcome Back';
-  document.getElementById('ep-msg').textContent = v.count <= 1
-    ? 'It looks like you\'re new here! You can import previously saved data to restore your settings and game progress.'
-    : 'You\'ve visited ' + v.count + ' times. Import a backup to restore your latest data.';
-  setTimeout(function() { el.classList.add('on'); }, 400);
-})();
-
-function closeEP() { document.getElementById('entry-pop').classList.remove('on'); }
-
-function impDataEP(e) {
-  impData(e);
-  closeEP();
-}
-
-/* ═══════════════════════════════════════════
-   Populate Games Grid
-   ═══════════════════════════════════════════ */
-var gg = document.getElementById('gm-grid');
-Object.keys(G).forEach(function(id) {
-  var g = G[id];
-  var b = document.createElement('button');
-  b.className = 'gm-btn';
-  b.dataset.id = id;
-  b.setAttribute('aria-label', 'Play ' + g.name);
-  b.onclick = function() { launchGame(id); };
-  var s = document.createElement('span');
-  s.textContent = g.name;
-  b.appendChild(s);
-  gg.appendChild(b);
-});
-
-document.getElementById('gm-count').textContent = GC + ' games';
-document.getElementById('set-gc').textContent = GC;
-document.getElementById('sb-foot').textContent = 'java v1.0 \u2022 ' + GC + ' games';
-
-/* WebGL check */
-(function() {
-  try {
-    var c = document.createElement('canvas');
-    var gl = c.getContext('webgl') || c.getContext('experimental-webgl');
-    var el = document.getElementById('set-wgl');
-    el.textContent = gl ? 'Supported' : 'Not supported';
-    el.style.color = gl ? 'var(--green)' : 'var(--red)';
-  } catch(e) {
-    document.getElementById('set-wgl').textContent = 'Not supported';
-  }
-})();
-
-/* ═══════════════════════════════════════════
-   Navigation
-   ═══════════════════════════════════════════ */
-var pt = { home: 'Home', games: 'Games', settings: 'Settings' };
-
-function navTo(p) {
-  document.querySelectorAll('.nav-i').forEach(function(i) {
-    i.classList.toggle('on', i.dataset.page === p);
-  });
-  document.querySelectorAll('.page').forEach(function(pg) { pg.classList.remove('on'); });
-  document.getElementById('page-' + p).classList.add('on');
-  document.getElementById('tb-title').textContent = pt[p] || p;
-  closeSB();
-  if (p === 'settings') updStor();
-}
-
-function toggleSB() {
-  document.getElementById('sidebar').classList.toggle('on');
-  document.getElementById('sb-ov').classList.toggle('on');
-}
-function closeSB() {
-  document.getElementById('sidebar').classList.remove('on');
-  document.getElementById('sb-ov').classList.remove('on');
-}
-
-/* ═══════════════════════════════════════════
-   Clock & Battery
-   ═══════════════════════════════════════════ */
-function updClk() {
-  var n = new Date();
-  var h = n.getHours();
-  var m = String(n.getMinutes()).padStart(2, '0');
-  var ap = h >= 12 ? 'PM' : 'AM';
-  h = h % 12 || 12;
-  document.getElementById('clk-time').textContent = h + ':' + m;
-  document.getElementById('clk-ampm').textContent = ap;
-  var ds = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var ms = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('clk-date').textContent = ds[n.getDay()] + ', ' + ms[n.getMonth()] + ' ' + n.getDate();
-}
-updClk();
-setInterval(updClk, 1000);
-
-/* Home info & Stats tracking */
-function updateHomepageStats() {
-  var v = LS.get('visits', { count: 0 });
-  var wgl = document.getElementById('set-wgl').textContent;
-  var info = GC + ' games available \u2022 WebGL: ' + wgl;
-  if (v.count > 1) info += ' \u2022 Visit #' + v.count;
-  else info += ' \u2022 First visit';
-  document.getElementById('home-info').textContent = info;
-  document.getElementById('set-vis').textContent = v.count;
-}
-updateHomepageStats();
-
-/* Battery */
-(function() {
-  if (!navigator.getBattery) {
-    document.getElementById('bat-pct').textContent = 'N/A';
-    document.getElementById('bat-st').textContent = 'Not supported';
-    return;
-  }
-  navigator.getBattery().then(function(bat) {
-    function u() {
-      var p = Math.round(bat.level * 100);
-      document.getElementById('bat-pct').textContent = p + '%';
-      document.getElementById('bat-st').textContent = bat.charging ? 'Charging' : 'On Battery';
-      var f = document.getElementById('bat-fill');
-      f.setAttribute('width', Math.max(1, bat.level * 15));
-      f.setAttribute('fill', p <= 20 ? 'var(--red)' : p <= 50 ? '#ffd60a' : 'var(--green)');
+  if (action === 'back') {
+    if (browserHistoryIdx > 0) {
+      browserHistoryIdx--;
+      var backUrl = browserHistory[browserHistoryIdx];
+      document.getElementById('browser-url').value = backUrl;
+      iframe.src = backUrl;
     }
-    u();
-    bat.addEventListener('chargingchange', u);
-    bat.addEventListener('levelchange', u);
-  }).catch(function() {
-    document.getElementById('bat-pct').textContent = 'N/A';
-    document.getElementById('bat-st').textContent = 'Error';
-  });
-})();
-
-/* ═══════════════════════════════════════════
-   Search
-   ═══════════════════════════════════════════ */
-function filterG() {
-  var q = document.getElementById('search-in').value.toLowerCase().trim();
-  var bs = gg.querySelectorAll('.gm-btn');
-  var c = 0;
-  bs.forEach(function(b) {
-    var n = b.querySelector('span').textContent.toLowerCase();
-    var show = n.indexOf(q) !== -1;
-    b.style.display = show ? '' : 'none';
-    if (show) c++;
-  });
-  document.getElementById('no-res').style.display = c === 0 ? 'block' : 'none';
-  document.getElementById('gm-count').textContent = c + ' game' + (c !== 1 ? 's' : '');
-}
-
-/* ═══════════════════════════════════════════
-   Background Image
-   ═══════════════════════════════════════════ */
-function applyBg(du) {
-  if (!du) {
-    document.getElementById('bg-layer').classList.remove('on');
-    document.getElementById('bg-dim').classList.remove('on');
-    document.getElementById('bg-img').src = '';
-    document.getElementById('bg-prev').classList.remove('on');
-    document.getElementById('bg-prev').src = '';
-    return;
-  }
-  document.getElementById('bg-layer').classList.add('on');
-  document.getElementById('bg-dim').classList.add('on');
-  document.getElementById('bg-img').src = du;
-  document.getElementById('bg-prev').src = du;
-  document.getElementById('bg-prev').classList.add('on');
-}
-
-function handleBg(e) {
-  var f = e.target.files[0];
-  if (!f) return;
-  if (!f.type.startsWith('image/')) { toast('Only images are supported.'); return; }
-  var r = new FileReader();
-  r.onload = function(ev) {
-    var du = ev.target.result;
-    try { localStorage.setItem('j_bg', du); }
-    catch(err) { toast('Image too large to save permanently. It works this session only.'); }
-    applyBg(du);
-    toast('Background updated.');
-  };
-  r.readAsDataURL(f);
-  e.target.value = '';
-}
-
-function rmBg() {
-  localStorage.removeItem('j_bg');
-  applyBg(null);
-  toast('Background removed.');
-}
-
-/* Restore background on load */
-(function() {
-  try {
-    var b = localStorage.getItem('j_bg');
-    if (b) applyBg(b);
-  } catch(e) {}
-})();
-
-/* ═══════════════════════════════════════════
-   Export / Import / Clear
-   ═══════════════════════════════════════════ */
-function expData() {
-  var d = LS.all();
-  var bg = localStorage.getItem('j_bg');
-  if (bg) d['j_bg'] = bg;
-  Object.keys(G).forEach(function(id) {
-    var c = localStorage.getItem('j_ctrl_' + id);
-    if (c) d['j_ctrl_' + id] = c;
-  });
-  var pl = {
-    _meta: { app: 'java', ver: '1.0.0', at: new Date().toISOString(), games: GC },
-    data: d
-  };
-  var bl = new Blob([JSON.stringify(pl)], { type: 'application/json' });
-  var u = URL.createObjectURL(bl);
-  var a = document.createElement('a');
-  a.href = u;
-  a.download = 'java-backup-' + Date.now() + '.json';
-  a.click();
-  URL.revokeObjectURL(u);
-  toast('Data exported successfully.');
-}
-
-function impData(e) {
-  var f = e.target.files[0];
-  if (!f) return;
-  var r = new FileReader();
-  r.onload = function(ev) {
-    try {
-      var pl = JSON.parse(ev.target.result);
-      if (!pl.data || typeof pl.data !== 'object') throw new Error('Invalid');
-      LS.importAll(pl.data);
-      var bg = localStorage.getItem('j_bg');
-      if (bg) applyBg(bg);
-      updStor();
-      toast('Data imported successfully. Refresh for full effect.');
-    } catch(err) {
-      toast('Import failed: invalid file format.');
+  } else if (action === 'forward') {
+    if (browserHistoryIdx < browserHistory.length - 1) {
+      browserHistoryIdx++;
+      var fwdUrl = browserHistory[browserHistoryIdx];
+      document.getElementById('browser-url').value = fwdUrl;
+      iframe.src = fwdUrl;
     }
-  };
-  r.readAsText(f);
-  e.target.value = '';
+  } else if (action === 'refresh') {
+    iframe.src = iframe.src;
+  } else if (action === 'navigate') {
+    var urlIn = document.getElementById('browser-url').value.trim();
+    if (!urlIn) return;
+    
+    var finalUrl;
+    if (urlIn.startsWith('http://') || urlIn.startsWith('https://') || (urlIn.indexOf('.') !== -1 && urlIn.indexOf(' ') === -1)) {
+      finalUrl = urlIn.startsWith('http') ? urlIn : 'https://' + urlIn;
+    } else {
+      finalUrl = 'https://search.brave.com/search?q=' + encodeURIComponent(urlIn);
+    }
+    
+    // Add loading indicator
+    document.getElementById('browser-loader').style.display = 'block';
+    iframe.src = finalUrl;
+    
+    // Track internal history array due to iframe cross-origin restriction fallbacks
+    if (browserHistory[browserHistoryIdx] !== finalUrl) {
+      browserHistory = browserHistory.slice(0, browserHistoryIdx + 1);
+      browserHistory.push(finalUrl);
+      browserHistoryIdx = browserHistory.length - 1;
+    }
+    
+    activeGames['web-browser'].url = finalUrl;
+    activeGames['web-browser'].query = urlIn;
+    addSessionHistory('Web Browser search', 'web', urlIn);
+    updateActiveSessionsUI();
+  }
 }
-
-function updStor() {
-  var b = LS.sz();
-  var kb = (b / 1024).toFixed(1);
-  document.getElementById('stor-size').textContent = kb + ' KB';
-  document.getElementById('stor-fill').style.width = Math.min(100, b / (5 * 1024 * 1024) * 100) + '%';
-}
-updStor();
-
-/* Confirm clear */
-var _cmFn = null;
-function confirmClear() {
-  document.getElementById('cm-title').textContent = 'Reset All Data';
-  document.getElementById('cm-msg').textContent = 'This permanently deletes all your settings, game stats, controller configs, and backgrounds. This cannot be undone.';
-  _cmFn = function() {
-    LS.clear();
-    localStorage.removeItem('j_bg');
-    Object.keys(G).forEach(function(id) { localStorage.removeItem('j_ctrl_' + id); });
-    applyBg(null);
-    updStor();
-    toast('All data has been cleared.');
-  };
-  document.getElementById('cmodal').classList.add('on');
-}
-function cmDo() { if (_cmFn) _cmFn(); _cmFn = null; closeCM(); }
-function closeCM() { document.getElementById('cmodal').classList.remove('on'); _cmFn = null; }
 
 /* ═══════════════════════════════════════════
-   Brave Hidden Browser Search Execution
+   Brave Hidden Browser Integration Handler
    ═══════════════════════════════════════════ */
-function searchWeb() {
-  var input = document.getElementById('hp-search-in');
-  var q = input.value.trim();
-  if (!q) return;
-  input.value = '';
-
-  var url;
-  if (q.startsWith('http://') || q.startsWith('https://') || (q.indexOf('.') !== -1 && q.indexOf(' ') === -1)) {
-    url = q.startsWith('http') ? q : 'https://' + q;
-  } else {
-    url = 'https://search.brave.com/search?q=' + encodeURIComponent(q);
-  }
-
-  launchWebBrowser(url);
-}
-
 function launchWebBrowser(url) {
   curGame = 'web-browser';
   document.getElementById('ld-name').textContent = 'Web Browser';
@@ -1179,25 +1261,42 @@ function launchWebBrowser(url) {
     iframe.style.height = '100%';
     iframe.style.border = 'none';
     iframe.style.background = '#fff';
+    /* Bypasses frame busting, blocking, and window hijackings by strictly omitting allow-top-navigation */
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms allow-downloads');
+    iframe.onload = function() {
+      document.getElementById('browser-loader').style.display = 'none';
+    };
     document.getElementById('game-container').appendChild(iframe);
   }
 
+  document.getElementById('browser-loader').style.display = 'block';
   iframe.src = url;
+  
+  if (browserHistory.length === 0) {
+    browserHistory.push(url);
+    browserHistoryIdx = 0;
+  }
+  document.getElementById('browser-url').value = url;
+
   activeGames['web-browser'] = {
     iframe: iframe,
     name: 'Web Browser',
-    url: url
+    url: url,
+    query: url
   };
 
   document.querySelectorAll('.game-frame').forEach(function(f) {
     f.style.display = f.id === iframeId ? 'block' : 'none';
   });
 
+  addSessionHistory('Launched Browser Session', 'web', url);
+
   setTimeout(function() {
     document.getElementById('loading').classList.remove('on');
     document.getElementById('game-view').classList.add('on');
+    document.getElementById('browser-nav').classList.add('on');
     document.getElementById('back-btn').classList.add('on');
+    document.getElementById('rotate-btn').classList.add('on');
     document.getElementById('fs-btn').classList.add('on');
     document.getElementById('ctrl-tog').classList.remove('on');
     document.getElementById('ctrl-gear').classList.remove('on');
@@ -1207,6 +1306,66 @@ function launchWebBrowser(url) {
   }, 600);
 
   updateActiveSessionsUI();
+}
+
+/* ═══════════════════════════════════════════
+   Games Library Population & Rebuild Engine
+   ═══════════════════════════════════════════ */
+function rebuildGamesLibrary() {
+  gg.innerHTML = '';
+  
+  // Pre-loaded files
+  Object.keys(G).forEach(function(id) {
+    var g = G[id];
+    createGameGridItem(id, g);
+  });
+
+  // Locally uploaded Custom HTML files
+  var customGames = LS.get('custom_games', {});
+  Object.keys(customGames).forEach(function(id) {
+    var g = customGames[id];
+    createGameGridItem(id, g);
+  });
+
+  updateGridDots();
+}
+
+function createGameGridItem(id, g) {
+  var b = document.createElement('button');
+  b.className = 'gm-btn';
+  b.dataset.id = id;
+  b.setAttribute('aria-label', 'Play ' + g.name);
+  b.onclick = function() { launchGame(id); };
+  var s = document.createElement('span');
+  s.textContent = g.name;
+  b.appendChild(s);
+  gg.appendChild(b);
+}
+
+// Initial games library population
+rebuildGamesLibrary();
+
+/* ═══════════════════════════════════════════
+   Rotation Viewport Handler Interface (Failsafe layout rotation)
+   ═══════════════════════════════════════════ */
+var isViewportRotated = false;
+
+function toggleRotate() {
+  isViewportRotated = !isViewportRotated;
+  var container = document.getElementById('game-container');
+  var controller = document.getElementById('ctrl');
+  
+  if (isViewportRotated) {
+    container.classList.add('rotated');
+    controller.style.flexDirection = 'column-reverse';
+    controller.style.alignItems = 'center';
+    toast('Viewport Rotated (90deg)');
+  } else {
+    container.classList.remove('rotated');
+    controller.style.flexDirection = '';
+    controller.style.alignItems = '';
+    toast('Viewport Rotation Reset');
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -1231,14 +1390,19 @@ function updateActiveSessionsUI() {
 
     var info = document.createElement('div');
     info.className = 'act-sess-info';
-    var dot = document.createElement('div');
-    dot.className = 'act-sess-dot';
+    
+    var textWrapper = document.createElement('div');
     var name = document.createElement('div');
     name.className = 'act-sess-name';
     name.textContent = s.name;
-
-    info.appendChild(dot);
-    info.appendChild(name);
+    
+    var sub = document.createElement('div');
+    sub.className = 'act-sess-sub';
+    sub.textContent = id === 'web-browser' ? (s.query || s.url) : 'Active Session';
+    
+    textWrapper.appendChild(name);
+    textWrapper.appendChild(sub);
+    info.appendChild(textWrapper);
 
     var btns = document.createElement('div');
     btns.className = 'act-sess-btns';
@@ -1299,76 +1463,339 @@ function updateGridDots() {
 }
 
 /* ═══════════════════════════════════════════
-   Orientation Tracker (Responsive Landscape Monitor)
+   Experimental Tab - AI Mobile Controls Setup
    ═══════════════════════════════════════════ */
-function checkOrientation() {
-  var isPortrait = window.innerHeight > window.innerWidth;
-  var rr = document.getElementById('rotate-reminder');
-  
-  // Web browser bypasses mandatory landscape; games enforce it
-  if (curGame && curGame !== 'web-browser' && isPortrait) {
-    rr.classList.add('on');
-  } else {
-    rr.classList.remove('on');
-  }
+window.AI_SECRET_KEY = LS.get('ai_secret_key', 'sk_EWqk7r59yike1nGXMlHHs7WSDXL7YmEE');
+var aiEnabled = LS.get('ai_enabled', false);
+
+document.getElementById('ai-toggle').checked = aiEnabled;
+document.getElementById('ai-secret-key-input').value = window.AI_SECRET_KEY;
+
+function toggleAI(val) {
+  aiEnabled = val;
+  LS.set('ai_enabled', val);
+  toast('AI Autopilot controls ' + (val ? 'Enabled' : 'Disabled'));
 }
-window.addEventListener('resize', checkOrientation);
-window.addEventListener('orientationchange', checkOrientation);
+
+function saveAIKey(key) {
+  window.AI_SECRET_KEY = key;
+  LS.set('ai_secret_key', key);
+  toast('AI access key saved.');
+}
+
+async function requestAICustomControls(gameName) {
+  try {
+    toast('Generating AI Touch Controls...');
+    var response = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + window.AI_SECRET_KEY
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "system",
+            content: "Identify the standard keys needed to play the specified game on a PC keyboard, and construct a mobile control overlay map. Answer strictly in JSON Array format containing 2 to 5 keys, matching this exact shape: `[['Jump', 'Space'], ['Action', 'KeyE']]`. Make sure keys mapped are valid KeyboardEvent codes (e.g. Space, ShiftLeft, KeyE, ArrowUp, ArrowDown, KeyW). Return ONLY the raw array. No markdown formatting, prefix, or explanation."
+          },
+          {
+            role: "user",
+            content: "Generate controller buttons overlay map for game: " + gameName
+          }
+        ],
+        model: "openai"
+      })
+    });
+    
+    var text = await response.text();
+    // Sanitize any occasional markdown code blocks from model outputs
+    var cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    var mappedControls = JSON.parse(cleaned);
+    if (Array.isArray(mappedControls)) {
+      return mappedControls;
+    }
+  } catch(e) {
+    console.warn("AI Controls extraction failed, falling back to defaults.", e);
+  }
+  return null;
+}
 
 /* ═══════════════════════════════════════════
-   Virtual Controller & Touch Pointer (Mouse Mode)
+   Background Image
    ═══════════════════════════════════════════ */
-var curGame = null;
-var ctrlOn = false;
-var mouseMode = false;
-var cursorX = window.innerWidth / 2;
-var cursorY = window.innerHeight / 2;
-var lastTouchX = null;
-var lastTouchY = null;
+function applyBg(du) {
+  if (!du) {
+    document.getElementById('bg-layer').classList.remove('on');
+    document.getElementById('bg-dim').classList.remove('on');
+    document.getElementById('bg-img').src = '';
+    document.getElementById('bg-prev').classList.remove('on');
+    document.getElementById('bg-prev').src = '';
+    return;
+  }
+  document.getElementById('bg-layer').classList.add('on');
+  document.getElementById('bg-dim').classList.add('on');
+  document.getElementById('bg-img').src = du;
+  document.getElementById('bg-prev').src = du;
+  document.getElementById('bg-prev').classList.add('on');
+}
 
-var tp = document.getElementById('trackpad');
-var vc = document.getElementById('virtual-cursor');
+function handleBg(e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  if (!f.type.startsWith('image/')) { toast('Only images are supported.'); return; }
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var du = ev.target.result;
+    try { localStorage.setItem('j_bg', du); }
+    catch(err) { toast('Image too large to save permanently. Works this session only.'); }
+    applyBg(du);
+    toast('Background updated.');
+  };
+  r.readAsDataURL(f);
+  e.target.value = '';
+}
 
-/* Populate key select dropdown */
+function rmBg() {
+  localStorage.removeItem('j_bg');
+  applyBg(null);
+  toast('Background removed.');
+}
+
+/* Restore background on load */
 (function() {
-  var sel = document.getElementById('cp-new-key');
-  Object.keys(KM).forEach(function(code) {
-    var o = document.createElement('option');
-    o.value = code;
-    o.textContent = kdisp(code);
-    sel.appendChild(o);
-  });
+  try {
+    var b = localStorage.getItem('j_bg');
+    if (b) applyBg(b);
+  } catch(e) {}
 })();
 
-/* Dispatch a keyboard event directly into the active session iframe */
-function sendKey(code, type) {
-  var info = KM[code];
-  if (!info || !curGame || !activeGames[curGame]) return;
-  var iframe = activeGames[curGame].iframe;
-  if (!iframe) return;
-  try {
-    var doc = iframe.contentDocument || iframe.contentWindow.document;
-    if (!doc) return;
-    var ev = new KeyboardEvent(type, {
-      key: info.key,
-      code: info.code,
-      keyCode: info.kc,
-      which: info.kc,
-      bubbles: true,
-      cancelable: true
-    });
-    doc.dispatchEvent(ev);
-    var win = iframe.contentWindow;
-    if (win) win.dispatchEvent(ev);
-  } catch(e) {
+/* ═══════════════════════════════════════════
+   Export / Import / Clear Backup Utilities
+   ═══════════════════════════════════════════ */
+function expData() {
+  var d = LS.all();
+  var pl = {
+    _meta: { app: 'java', ver: '1.0.0', at: new Date().toISOString() },
+    data: d
+  };
+  var bl = new Blob([JSON.stringify(pl)], { type: 'application/json' });
+  var u = URL.createObjectURL(bl);
+  var a = document.createElement('a');
+  a.href = u;
+  a.download = 'java-ultimate-backup-' + Date.now() + '.json';
+  a.click();
+  URL.revokeObjectURL(u);
+  toast('All settings & custom games exported.');
+}
+
+function impData(e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function(evt) {
     try {
-      var win2 = iframe.contentWindow;
-      win2.postMessage({ type: 'java-key', eventType: type, key: info.key, code: info.code, kc: info.kc }, '*');
-    } catch(e2) {}
+      var pl = JSON.parse(evt.target.result);
+      if (!pl.data || typeof pl.data !== 'object') throw new Error('Invalid');
+      LS.importAll(pl.data);
+      toast('Data imported. Refreshing session...');
+      setTimeout(function() { location.reload(); }, 1200);
+    } catch(err) {
+      toast('Import failed: invalid backup structure.');
+    }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+}
+
+function updStor() {
+  var b = LS.sz();
+  var kb = (b / 1024).toFixed(1);
+  document.getElementById('stor-size').textContent = kb + ' KB';
+  document.getElementById('stor-fill').style.width = Math.min(100, b / (5 * 1024 * 1024) * 100) + '%';
+}
+updStor();
+
+/* Confirm clear */
+var _cmFn = null;
+function confirmClear() {
+  document.getElementById('cm-title').textContent = 'Reset All Data';
+  document.getElementById('cm-msg').textContent = 'This permanently deletes settings, history, controllers, custom games, and backgrounds.';
+  _cmFn = function() {
+    LS.clear();
+    localStorage.removeItem('j_bg');
+    applyBg(null);
+    updStor();
+    toast('All localized data deleted.');
+    setTimeout(function() { location.reload(); }, 1200);
+  };
+  document.getElementById('cmodal').classList.add('on');
+}
+function cmDo() { if (_cmFn) _cmFn(); _cmFn = null; closeCM(); }
+function closeCM() { document.getElementById('cmodal').classList.remove('on'); _cmFn = null; }
+
+/* ═══════════════════════════════════════════
+   Launch Game Session Controller
+   ═══════════════════════════════════════════ */
+async function launchGame(id) {
+  // Try custom files first, then pre-installed catalog
+  var customGames = LS.get('custom_games', {});
+  var g = customGames[id] || G[id];
+  if (!g) return;
+
+  curGame = id;
+
+  /* Track stats */
+  var st = LS.get('gstats', {});
+  if (!st[id]) st[id] = { plays: 0, first: Date.now(), last: null };
+  st[id].plays++;
+  st[id].last = Date.now();
+  LS.set('gstats', st);
+
+  updateHomepageStats();
+
+  var iframeId = 'iframe-' + id;
+  var iframe = document.getElementById(iframeId);
+
+  if (iframe) {
+    document.querySelectorAll('.game-frame').forEach(function(f) {
+      f.style.display = f.id === iframeId ? 'block' : 'none';
+    });
+    showGameUI(id, g);
+    return;
+  }
+
+  document.getElementById('ld-name').textContent = g.name;
+  document.getElementById('loading').classList.add('on');
+
+  try {
+    var html;
+    if (g.custom) {
+      html = g.html;
+    } else {
+      var resp = await fetch(g.url);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      html = await resp.text();
+    }
+
+    var baseTag = g.custom ? '' : '<base href="' + g.base + '">';
+    if (html.indexOf('<head>') !== -1) {
+      html = html.replace('<head>', '<head>' + baseTag);
+    } else if (html.indexOf('<HEAD>') !== -1) {
+      html = html.replace('<HEAD>', '<HEAD>' + baseTag);
+    } else if (html.indexOf('<html') !== -1) {
+      html = html.replace(/<html[^>]*>/, '$&<head>' + baseTag + '</head>');
+    } else {
+      html = baseTag + html;
+    }
+
+    iframe = document.createElement('iframe');
+    iframe.id = iframeId;
+    iframe.className = 'game-frame';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.background = '#000';
+    /* Immunize container against window redirection hacks */
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
+    document.getElementById('game-container').appendChild(iframe);
+
+    iframe.srcdoc = html;
+
+    activeGames[id] = {
+      iframe: iframe,
+      name: g.name
+    };
+
+    document.querySelectorAll('.game-frame').forEach(function(f) {
+      f.style.display = f.id === iframeId ? 'block' : 'none';
+    });
+
+    /* BETA AI Controls Implementation Injection Hook */
+    if (aiEnabled) {
+      var generated = await requestAICustomControls(g.name);
+      if (generated) {
+        LS.set('ctrl_' + id, { btns: generated });
+      }
+    }
+
+    addSessionHistory(g.name, 'game', id);
+
+    document.getElementById('loading').classList.remove('on');
+    showGameUI(id, g);
+
+  } catch(err) {
+    console.error('Failed to load session:', err);
+    document.getElementById('loading').classList.remove('on');
+    toast('Could not initialize "' + g.name + '" session.');
   }
 }
 
-/* Trackpad Event Interfaces (Failsafe pointer routing for Safari iOS & PC) */
+function showGameUI(id, g) {
+  document.getElementById('game-view').classList.add('on');
+
+  setTimeout(function() {
+    document.getElementById('back-btn').classList.add('on');
+    document.getElementById('rotate-btn').classList.add('on');
+    document.getElementById('fs-btn').classList.add('on');
+    document.getElementById('ctrl-tog').classList.add('on');
+    document.getElementById('ctrl-gear').classList.add('on');
+    document.getElementById('mouse-tog').classList.add('on');
+  }, 500);
+
+  buildActBtns(id);
+
+  if (g.mobile) {
+    ctrlOn = false;
+    document.getElementById('ctrl').classList.remove('on');
+  } else {
+    ctrlOn = true;
+    document.getElementById('ctrl').classList.add('on');
+  }
+
+  var tutSeen = LS.get('gtut', false);
+  if (!tutSeen && g.btns && g.btns.length > 0) {
+    showTut();
+    LS.set('gtut', true);
+  }
+
+  checkOrientation();
+  updateActiveSessionsUI();
+}
+
+function closeGame() {
+  document.getElementById('game-view').classList.remove('on');
+  document.getElementById('browser-nav').classList.remove('on');
+  document.getElementById('back-btn').classList.remove('on');
+  document.getElementById('rotate-btn').classList.remove('on');
+  document.getElementById('fs-btn').classList.remove('on');
+  document.getElementById('ctrl-tog').classList.remove('on');
+  document.getElementById('ctrl-gear').classList.remove('on');
+  document.getElementById('mouse-tog').classList.remove('on');
+  document.getElementById('ctrl').classList.remove('on');
+
+  if (mouseMode) toggleMouseMode();
+  
+  // Revert orientation overrides
+  if (isViewportRotated) toggleRotate();
+
+  ctrlOn = false;
+  curGame = null;
+  closeCP();
+
+  try { 
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  } catch(e) {}
+
+  checkOrientation();
+  updateActiveSessionsUI();
+}
+
+/* ═══════════════════════════════════════════
+   Mouse Pointer simulation coordinates mapper
+   ═══════════════════════════════════════════ */
 tp.addEventListener('pointerdown', function(e) {
   tp.setPointerCapture(e.pointerId);
   lastTouchX = e.clientX;
@@ -1426,7 +1853,7 @@ function dispatchMouseEvent(type) {
     });
     target.dispatchEvent(ev);
   } catch(err) {
-    console.warn("Could not dispatch virtual mouse event inside container: ", err);
+    console.warn("Touch mapping aborted due to cross-origin limitations:", err);
   }
 }
 
@@ -1439,7 +1866,7 @@ function toggleMouseMode() {
   toast('Mouse Touchpad ' + (mouseMode ? 'Enabled' : 'Disabled'));
 }
 
-/* D-Pad controls mapping */
+/* D-Pad key routing engine */
 var dpadMap = {
   up: ['KeyW', 'ArrowUp'],
   down: ['KeyS', 'ArrowDown'],
@@ -1472,9 +1899,9 @@ document.querySelectorAll('.dpad-b').forEach(function(btn) {
   btn.addEventListener('pointercancel', up);
 });
 
-/* Build action buttons for a game */
 function buildActBtns(id) {
-  var g = G[id];
+  var customGames = LS.get('custom_games', {});
+  var g = customGames[id] || G[id];
   if (!g) return;
   var cont = document.getElementById('act-btns');
   cont.innerHTML = '';
@@ -1526,12 +1953,11 @@ function toggleCtrl() {
   document.getElementById('ctrl').classList.toggle('on', ctrlOn);
 }
 
-/* Controller settings panel */
 function openCP() {
   if (!curGame) return;
-  var g = G[curGame];
+  var customGames = LS.get('custom_games', {});
+  var g = customGames[curGame] || G[curGame];
   document.getElementById('cp-title').textContent = g.name + ' Controls';
-  document.getElementById('cp-sub').textContent = 'D-Pad always sends WASD + Arrow keys. Customize action buttons below.';
 
   var rows = document.getElementById('cp-rows');
   rows.innerHTML = '';
@@ -1559,7 +1985,7 @@ function openCP() {
     sel.onchange = (function(idx) {
       return function() {
         var current = LS.get('ctrl_' + curGame, null);
-        var cb = current && current.btns ? current.btns : (G[curGame].btns ? G[curGame].btns.slice() : []);
+        var cb = current && current.btns ? current.btns : (g.btns ? g.btns.slice() : []);
         cb[idx][1] = sel.value;
         LS.set('ctrl_' + curGame, { btns: cb });
         buildActBtns(curGame);
@@ -1574,7 +2000,7 @@ function openCP() {
     rm.onclick = (function(idx) {
       return function() {
         var current = LS.get('ctrl_' + curGame, null);
-        var cb = current && current.btns ? current.btns : (G[curGame].btns ? G[curGame].btns.slice() : []);
+        var cb = current && current.btns ? current.btns : (g.btns ? g.btns.slice() : []);
         cb.splice(idx, 1);
         LS.set('ctrl_' + curGame, { btns: cb });
         buildActBtns(curGame);
@@ -1597,12 +2023,14 @@ function closeCP() {
 
 function addBtn() {
   if (!curGame) return;
+  var customGames = LS.get('custom_games', {});
+  var g = customGames[curGame] || G[curGame];
   var lbl = document.getElementById('cp-new-lbl').value.trim();
   var key = document.getElementById('cp-new-key').value;
   if (!lbl) { toast('Enter a button label.'); return; }
 
   var custom = LS.get('ctrl_' + curGame, null);
-  var btns = custom && custom.btns ? custom.btns : (G[curGame].btns ? G[curGame].btns.slice() : []);
+  var btns = custom && custom.btns ? custom.btns : (g.btns ? g.btns.slice() : []);
   btns.push([lbl, key]);
   LS.set('ctrl_' + curGame, { btns: btns });
   document.getElementById('cp-new-lbl').value = '';
@@ -1612,8 +2040,79 @@ function addBtn() {
 }
 
 /* ═══════════════════════════════════════════
-   Tutorial
+   Navigation
    ═══════════════════════════════════════════ */
+var pt = { home: 'Home', games: 'Games', settings: 'Settings' };
+
+function navTo(p) {
+  document.querySelectorAll('.nav-i').forEach(function(i) {
+    i.classList.toggle('on', i.dataset.page === p);
+  });
+  document.querySelectorAll('.page').forEach(function(pg) { pg.classList.remove('on'); });
+  document.getElementById('page-' + p).className = 'page on';
+  document.getElementById('tb-title').textContent = pt[p] || p;
+  closeSB();
+  if (p === 'settings') updStor();
+}
+
+function toggleSB() {
+  document.getElementById('sidebar').classList.toggle('on');
+  document.getElementById('sb-ov').classList.toggle('on');
+}
+function closeSB() {
+  document.getElementById('sidebar').classList.remove('on');
+  document.getElementById('sb-ov').classList.remove('on');
+}
+
+/* ═══════════════════════════════════════════
+   Clock
+   ═══════════════════════════════════════════ */
+function updClk() {
+  var n = new Date();
+  var h = n.getHours();
+  var m = String(n.getMinutes()).padStart(2, '0');
+  var ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  document.getElementById('clk-time').textContent = h + ':' + m;
+  document.getElementById('clk-ampm').textContent = ap;
+  var ds = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var ms = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('clk-date').textContent = ds[n.getDay()] + ', ' + ms[n.getMonth()] + ' ' + n.getDate();
+}
+updClk();
+setInterval(updClk, 1000);
+
+/* Home info */
+function updateHomepageStats() {
+  var v = LS.get('visits', { count: 0 });
+  var wgl = document.getElementById('set-wgl').textContent;
+  var customGames = LS.get('custom_games', {});
+  var totalG = GC + Object.keys(customGames).length;
+  var info = totalG + ' games available \u2022 WebGL: ' + wgl;
+  if (v.count > 1) info += ' \u2022 Visit #' + v.count;
+  else info += ' \u2022 First visit';
+  document.getElementById('home-info').textContent = info;
+  document.getElementById('set-vis').textContent = v.count;
+}
+
+/* ═══════════════════════════════════════════
+   Search
+   ═══════════════════════════════════════════ */
+function filterG() {
+  var q = document.getElementById('search-in').value.toLowerCase().trim();
+  var bs = gg.querySelectorAll('.gm-btn');
+  var c = 0;
+  bs.forEach(function(b) {
+    var n = b.querySelector('span').textContent.toLowerCase();
+    var show = n.indexOf(q) !== -1;
+    b.style.display = show ? '' : 'none';
+    if (show) c++;
+  });
+  document.getElementById('no-res').style.display = c === 0 ? 'block' : 'none';
+  document.getElementById('gm-count').textContent = c + ' game' + (c !== 1 ? 's' : '');
+}
+
+/* Tutorial */
 function showTut() {
   document.getElementById('tut').classList.add('on');
 }
@@ -1621,177 +2120,7 @@ function closeTut() {
   document.getElementById('tut').classList.remove('on');
 }
 
-/* ═══════════════════════════════════════════
-   Fullscreen (Both desktop and iOS configurations supported)
-   ═══════════════════════════════════════════ */
-function goFS() {
-  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-    var el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    try { screen.orientation.lock('landscape').catch(function() {}); } catch(e) {}
-  } else {
-    if (document.exitFullscreen) document.exitFullscreen();
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-  }
-}
-
-/* ═══════════════════════════════════════════
-   Launch Game (Background Persistent Implementation)
-   ═══════════════════════════════════════════ */
-async function launchGame(id) {
-  var g = G[id];
-  if (!g) return;
-
-  curGame = id;
-
-  /* Track stats */
-  var st = LS.get('gstats', {});
-  if (!st[id]) st[id] = { plays: 0, first: Date.now(), last: null };
-  st[id].plays++;
-  st[id].last = Date.now();
-  LS.set('gstats', st);
-
-  updateHomepageStats();
-
-  var iframeId = 'iframe-' + id;
-  var iframe = document.getElementById(iframeId);
-
-  if (iframe) {
-    /* If the game is already loaded in background, bypass fetch phase */
-    document.querySelectorAll('.game-frame').forEach(function(f) {
-      f.style.display = f.id === iframeId ? 'block' : 'none';
-    });
-    showGameUI(id, g);
-    return;
-  }
-
-  document.getElementById('ld-name').textContent = g.name;
-  document.getElementById('loading').classList.add('on');
-
-  try {
-    var resp = await fetch(g.url);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var html = await resp.text();
-
-    /* Inject relative <base> parsing mechanics */
-    var baseTag = '<base href="' + g.base + '">';
-    if (html.indexOf('<head>') !== -1) {
-      html = html.replace('<head>', '<head>' + baseTag);
-    } else if (html.indexOf('<HEAD>') !== -1) {
-      html = html.replace('<HEAD>', '<HEAD>' + baseTag);
-    } else if (html.indexOf('<html') !== -1) {
-      html = html.replace(/<html[^>]*>/, '$&<head>' + baseTag + '</head>');
-    } else {
-      html = baseTag + html;
-    }
-
-    iframe = document.createElement('iframe');
-    iframe.id = iframeId;
-    iframe.className = 'game-frame';
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.style.background = '#000';
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
-    document.getElementById('game-container').appendChild(iframe);
-
-    iframe.srcdoc = html;
-
-    activeGames[id] = {
-      iframe: iframe,
-      name: g.name
-    };
-
-    document.querySelectorAll('.game-frame').forEach(function(f) {
-      f.style.display = f.id === iframeId ? 'block' : 'none';
-    });
-
-    document.getElementById('loading').classList.remove('on');
-    showGameUI(id, g);
-
-  } catch(err) {
-    console.error('Failed to load game:', err);
-    document.getElementById('loading').classList.remove('on');
-    toast('Could not load ' + g.name + '. Try again later.');
-  }
-}
-
-function showGameUI(id, g) {
-  document.getElementById('game-view').classList.add('on');
-
-  setTimeout(function() {
-    document.getElementById('back-btn').classList.add('on');
-    document.getElementById('fs-btn').classList.add('on');
-    document.getElementById('ctrl-tog').classList.add('on');
-    document.getElementById('ctrl-gear').classList.add('on');
-    document.getElementById('mouse-tog').classList.add('on');
-  }, 500);
-
-  buildActBtns(id);
-
-  if (g.mobile) {
-    ctrlOn = false;
-    document.getElementById('ctrl').classList.remove('on');
-  } else {
-    ctrlOn = true;
-    document.getElementById('ctrl').classList.add('on');
-  }
-
-  var tutSeen = LS.get('gtut', false);
-  if (!tutSeen && g.btns && g.btns.length > 0) {
-    showTut();
-    LS.set('gtut', true);
-  }
-
-  checkOrientation();
-  updateActiveSessionsUI();
-}
-
-function closeGame() {
-  document.getElementById('game-view').classList.remove('on');
-  document.getElementById('back-btn').classList.remove('on');
-  document.getElementById('fs-btn').classList.remove('on');
-  document.getElementById('ctrl-tog').classList.remove('on');
-  document.getElementById('ctrl-gear').classList.remove('on');
-  document.getElementById('mouse-tog').classList.remove('on');
-  document.getElementById('ctrl').classList.remove('on');
-  
-  if (mouseMode) toggleMouseMode();
-
-  ctrlOn = false;
-  curGame = null;
-  closeCP();
-
-  try { 
-    if (document.fullscreenElement || document.webkitFullscreenElement) {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    }
-  } catch(e) {}
-
-  checkOrientation();
-  updateActiveSessionsUI();
-}
-
-/* ═══════════════════════════════════════════
-   Toast
-   ═══════════════════════════════════════════ */
-function toast(msg) {
-  var t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  requestAnimationFrame(function() { t.classList.add('show'); });
-  setTimeout(function() {
-    t.classList.remove('show');
-    setTimeout(function() { t.remove(); }, 250);
-  }, 2600);
-}
-
-/* ═══════════════════════════════════════════
-   Keyboard & Touch
-   ═══════════════════════════════════════════ */
+/* Keyboard TouchSwipe */
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     if (document.getElementById('cmodal').classList.contains('on')) closeCM();
@@ -1801,7 +2130,6 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-/* Swipe down from top to close active page on mobile */
 var _tsy = 0;
 document.getElementById('game-view').addEventListener('touchstart', function(e) {
   _tsy = e.touches[0].clientY;
