@@ -1,797 +1,541 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
-    <title>java</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #141416; --surface: #1c1c1e; --card: #222224; --card-hover: #2c2c2e;
-            --border: rgba(255,255,255,0.06); --fg: #f5f5f7; --muted: #6e6e73;
-            --accent: #64d2ff; --red: #ff453a; --green: #30d158;
-            --sidebar-w: 220px; --radius: 14px; --radius-sm: 10px;
-        }
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-        html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:var(--bg);color:var(--fg)}
-        body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-        #app{height:100%;display:flex;position:relative}
-
-        /* ── Background layer ── */
-        #bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden;display:none}
-        #bg-layer.active{display:block}
-        #bg-layer video,#bg-layer img{width:100%;height:100%;object-fit:cover}
-        #bg-overlay{position:fixed;inset:0;z-index:1;background:rgba(20,20,22,0.82);pointer-events:none;display:none}
-        #bg-overlay.active{display:block}
-
-        /* ── Sidebar ── */
-        #sidebar{width:var(--sidebar-w);background:rgba(28,28,30,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;z-index:50;transition:transform 0.3s cubic-bezier(.4,0,.2,1);overflow-y:auto}
-        .sidebar-head{padding:20px 18px;border-bottom:1px solid var(--border)}
-        .sidebar-brand{display:flex;align-items:center;gap:9px}
-        .sidebar-brand svg{width:24px;height:24px;flex-shrink:0}
-        .sidebar-brand-name{font-size:20px;font-weight:800;letter-spacing:-0.3px}
-        .sidebar-nav{padding:10px 8px;flex:1}
-        .nav-item{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:var(--radius-sm);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:inherit}
-        .nav-item:hover{background:rgba(255,255,255,0.04);color:var(--fg)}
-        .nav-item.active{background:rgba(100,210,255,0.1);color:var(--accent)}
-        .nav-item svg{width:18px;height:18px;flex-shrink:0}
-        .sidebar-footer{padding:14px 18px;border-top:1px solid var(--border);font-size:10px;color:rgba(255,255,255,0.2);font-weight:500}
-
-        #sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:40;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity 0.3s,visibility 0.3s;pointer-events:none}
-        #sidebar-overlay.open{opacity:1;visibility:visible;pointer-events:all}
-
-        /* ── Main ── */
-        #main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%;position:relative;z-index:2}
-        .topbar{height:50px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;background:rgba(20,20,22,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-        #menu-btn{width:36px;height:36px;display:none;align-items:center;justify-content:center;background:none;border:none;color:var(--fg);cursor:pointer;border-radius:var(--radius-sm);transition:background 0.15s;flex-shrink:0}
-        #menu-btn:hover{background:rgba(255,255,255,0.06)}
-        #menu-btn svg{width:20px;height:20px}
-        .topbar-title{font-size:14px;font-weight:700}
-
-        .pages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative}
-        .page{display:none;padding:24px 20px 80px;animation:pageIn 0.2s ease}
-        .page.active{display:block}
-        @keyframes pageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-
-        /* ── Home ── */
-        .home-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 120px);text-align:center;gap:4px}
-        .clock-time{font-size:72px;font-weight:800;letter-spacing:-3px;line-height:1}
-        .clock-ampm{font-size:20px;font-weight:600;color:var(--muted);letter-spacing:1px}
-        .clock-date{font-size:15px;color:var(--muted);margin-top:8px;font-weight:500}
-        .battery-wrap{display:flex;align-items:center;gap:10px;margin-top:28px;padding:10px 20px;background:var(--surface);border-radius:50px;border:1px solid var(--border)}
-        .battery-wrap svg{width:28px;height:28px}
-        .battery-pct{font-size:18px;font-weight:700}
-        .battery-status{font-size:11px;color:var(--muted);font-weight:500}
-        .home-count{margin-top:20px;font-size:13px;color:var(--muted);font-weight:500}
-
-        /* ── Games ── */
-        .search-wrap{position:relative;margin-bottom:16px}
-        .search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
-        #search-input{width:100%;padding:11px 14px 11px 38px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--fg);font-size:13px;font-family:inherit;font-weight:500;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
-        #search-input::placeholder{color:var(--muted)}
-        #search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(100,210,255,0.1)}
-        .games-count-bar{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:12px;letter-spacing:0.3px}
-        .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px}
-        .no-results{text-align:center;color:var(--muted);padding:40px 0;font-size:13px;font-weight:500;display:none}
-
-        /* ── Game Button (text only) ── */
-        .game-btn{display:flex;align-items:center;justify-content:center;padding:13px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all 0.18s;outline:none;font-family:inherit;color:var(--fg);position:relative;overflow:hidden}
-        .game-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.015) 0%,transparent 50%);pointer-events:none}
-        .game-btn:hover{background:var(--card-hover);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.1)}
-        .game-btn:active{transform:scale(0.97);transition:transform 0.08s}
-        .game-btn:focus-visible{box-shadow:0 0 0 3px var(--accent)}
-        .game-btn-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
-
-        /* ── Settings ── */
-        .settings-section{margin-bottom:24px}
-        .settings-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:10px}
-        .settings-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-        .setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);gap:12px}
-        .setting-row:last-child{border-bottom:none}
-        .setting-label{font-size:13px;font-weight:600;flex:1;min-width:0}
-        .setting-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
-        .setting-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
-        .s-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.15s;white-space:nowrap}
-        .s-btn:hover{background:var(--card-hover)}
-        .s-btn:active{transform:scale(0.96)}
-        .s-btn.danger{border-color:rgba(255,69,58,0.3);color:var(--red)}
-        .s-btn.danger:hover{background:rgba(255,69,58,0.12)}
-        .s-btn.accent{border-color:rgba(100,210,255,0.3);color:var(--accent)}
-        .s-btn.accent:hover{background:rgba(100,210,255,0.1)}
-        .file-hidden{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
-        .bg-preview{width:100%;height:100px;border-radius:8px;object-fit:cover;margin-top:8px;background:var(--card);display:none}
-        .bg-preview.active{display:block}
-        .storage-bar{height:4px;background:var(--card);border-radius:2px;overflow:hidden;margin-top:6px}
-        .storage-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s}
-
-        /* ── Game View ── */
-        #game-view{position:fixed;inset:0;z-index:100;background:#000;opacity:0;transform:scale(1.02);transition:opacity 0.3s,transform 0.3s;pointer-events:none}
-        #game-view.active{opacity:1;transform:scale(1);pointer-events:all}
-        #game-frame{width:100%;height:100%;border:none;background:#000}
-        #back-btn{position:fixed;top:max(env(safe-area-inset-top,0px),10px);left:max(env(safe-area-inset-left,0px),10px);z-index:110;background:rgba(28,28,30,0.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:8px 15px;border-radius:50px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.2s;opacity:0;pointer-events:none}
-        #back-btn.visible{opacity:1;pointer-events:all}
-        #back-btn:hover{background:rgba(48,48,50,0.92)}
-        #back-btn:active{transform:scale(0.93)}
-        #back-btn svg{width:14px;height:14px}
-
-        /* ── Loading ── */
-        #loading{position:fixed;inset:0;z-index:120;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity 0.25s}
-        #loading.active{opacity:1;pointer-events:all}
-        .spinner{width:30px;height:30px;border:3px solid rgba(255,255,255,0.07);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        #loading-name{font-size:17px;font-weight:700}
-        #loading-text{font-size:12px;color:var(--muted);font-weight:500}
-
-        /* ── Confirm Modal ── */
-        #confirm-modal{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity 0.2s,visibility 0.2s;pointer-events:none}
-        #confirm-modal.open{opacity:1;visibility:visible;pointer-events:all}
-        .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:320px;width:90%;text-align:center}
-        .modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
-        .modal-msg{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;font-weight:500}
-        .modal-btns{display:flex;gap:8px;justify-content:center}
-        .modal-btns button{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:all 0.12s}
-        .modal-btns button:active{transform:scale(0.96)}
-        .modal-cancel{background:var(--card);color:var(--fg)}
-        .modal-confirm{background:var(--red);color:#fff}
-
-        /* ── Toast ── */
-        .toast{position:fixed;bottom:max(calc(env(safe-area-inset-bottom,0px)+16px),24px);left:50%;transform:translateX(-50%) translateY(10px);background:rgba(44,44,46,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;padding:9px 18px;border-radius:50px;font-size:12px;font-weight:600;font-family:inherit;z-index:200;opacity:0;transition:opacity 0.25s,transform 0.25s;border:1px solid rgba(255,255,255,0.06);white-space:nowrap}
-        .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-        /* ── Responsive ── */
-        @media(max-width:768px){
-            #sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);z-index:50}
-            #sidebar.open{transform:translateX(0)}
-            #menu-btn{display:flex}
-            .clock-time{font-size:58px;letter-spacing:-2px}
-        }
-        @media(min-width:769px){
-            .page{padding:28px 32px 80px}
-            #sidebar-overlay{display:none!important}
-        }
-        @media(min-width:1024px){
-            .page{padding:32px 44px 80px}
-            .games-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
-        }
-        ::-webkit-scrollbar{width:3px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:2px}
-        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover,maximum-scale=1">
+<title>java</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#141416;--surface:#1c1c1e;--card:#242426;--card-h:#2e2e30;--border:rgba(255,255,255,.06);--fg:#f5f5f7;--muted:#6e6e73;--accent:#64d2ff;--red:#ff453a;--green:#30d158;--sidebar-w:210px;--radius:14px;--radius-sm:10px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:var(--bg);color:var(--fg)}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#app{height:100%;display:flex;position:relative}
+#bg-layer{position:fixed;inset:0;z-index:0;display:none}
+#bg-layer.active{display:block}
+#bg-layer img{width:100%;height:100%;object-fit:cover}
+#bg-overlay{position:fixed;inset:0;z-index:1;background:rgba(20,20,22,.82);pointer-events:none;display:none}
+#bg-overlay.active{display:block}
+#sidebar{width:var(--sidebar-w);background:rgba(28,28,30,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;z-index:50;transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.sb-head{padding:18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:8px}
+.sb-brand svg{width:22px;height:22px;flex-shrink:0}
+.sb-brand span{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.sb-nav{padding:8px 6px;flex:1}
+.nav-i{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.nav-i:hover{background:rgba(255,255,255,.04);color:var(--fg)}
+.nav-i.active{background:rgba(100,210,255,.1);color:var(--accent)}
+.nav-i svg{width:17px;height:17px;flex-shrink:0}
+.sb-foot{padding:12px 16px;border-top:1px solid var(--border);font-size:9px;color:rgba(255,255,255,.2);font-weight:500}
+#sb-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;pointer-events:none}
+#sb-ov.open{opacity:1;visibility:visible;pointer-events:all}
+#main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%;position:relative;z-index:2}
+.topbar{height:48px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;background:rgba(20,20,22,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#menu-btn{width:34px;height:34px;display:none;align-items:center;justify-content:center;background:none;border:none;color:var(--fg);cursor:pointer;border-radius:var(--radius-sm);flex-shrink:0}
+#menu-btn:hover{background:rgba(255,255,255,.06)}
+#menu-btn svg{width:18px;height:18px}
+.tb-title{font-size:13px;font-weight:700}
+.pages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page{display:none;padding:22px 18px 70px;animation:pgIn .2s ease}
+.page.active{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.home-c{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 110px);text-align:center;gap:4px}
+.clk-time{font-size:66px;font-weight:800;letter-spacing:-3px;line-height:1}
+.clk-ampm{font-size:18px;font-weight:600;color:var(--muted);letter-spacing:1px}
+.clk-date{font-size:14px;color:var(--muted);margin-top:6px;font-weight:500}
+.bat-wrap{display:flex;align-items:center;gap:10px;margin-top:24px;padding:9px 18px;background:var(--surface);border-radius:50px;border:1px solid var(--border)}
+.bat-wrap svg{width:26px;height:26px}
+.bat-pct{font-size:16px;font-weight:700}
+.bat-st{font-size:10px;color:var(--muted);font-weight:500}
+.home-info{margin-top:16px;font-size:12px;color:var(--muted);font-weight:500;line-height:1.6}
+.search-w{position:relative;margin-bottom:14px}
+.search-w svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
+#search-in{width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--fg);font-size:12.5px;font-family:inherit;font-weight:500;outline:none;transition:border-color .2s,box-shadow .2s}
+#search-in::placeholder{color:var(--muted)}
+#search-in:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(100,210,255,.1)}
+.gm-count{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px;letter-spacing:.3px}
+.gm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.no-res{text-align:center;color:var(--muted);padding:36px 0;font-size:12px;font-weight:500;display:none}
+.gm-btn{display:flex;align-items:center;justify-content:center;padding:12px 8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .18s;outline:none;font-family:inherit;color:var(--fg);position:relative;overflow:hidden}
+.gm-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.015) 0%,transparent 50%);pointer-events:none}
+.gm-btn:hover{background:var(--card-h);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.3);border-color:rgba(255,255,255,.1)}
+.gm-btn:active{transform:scale(.97);transition:transform .08s}
+.gm-btn:focus-visible{box-shadow:0 0 0 3px var(--accent)}
+.gm-btn span{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.gm-btn .mobile-dot{position:absolute;top:8px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.set-sec{margin-bottom:20px}
+.set-sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
+.set-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);gap:10px}
+.set-row:last-child{border-bottom:none}
+.set-lbl{font-size:12.5px;font-weight:600;flex:1;min-width:0}
+.set-sub{font-size:10.5px;color:var(--muted);margin-top:2px;font-weight:400}
+.set-acts{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.s-b{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap}
+.s-b:hover{background:var(--card-h)}
+.s-b:active{transform:scale(.96)}
+.s-b.danger{border-color:rgba(255,69,58,.3);color:var(--red)}
+.s-b.danger:hover{background:rgba(255,69,58,.1)}
+.s-b.acc{border-color:rgba(100,210,255,.3);color:var(--accent)}
+.s-b.acc:hover{background:rgba(100,210,255,.08)}
+.file-h{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
+.bg-prev{width:100%;height:80px;border-radius:8px;object-fit:cover;margin-top:6px;background:var(--card);display:none}
+.bg-prev.active{display:block}
+.stor-bar{height:3px;background:var(--card);border-radius:2px;overflow:hidden;margin-top:5px}
+.stor-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+/* Game View */
+#game-view{position:fixed;inset:0;z-index:100;background:#000;opacity:0;transform:scale(1.02);transition:opacity .3s,transform .3s;pointer-events:none}
+#game-view.active{opacity:1;transform:scale(1);pointer-events:all}
+#game-frame{width:100%;height:100%;border:none;background:#000}
+#back-btn{position:fixed;top:max(env(safe-area-inset-top,0px),8px);left:max(env(safe-area-inset-left,0px),8px);z-index:115;background:rgba(28,28,30,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 14px;border-radius:50px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;opacity:0;pointer-events:none}
+#back-btn.vis{opacity:1;pointer-events:all}
+#back-btn:hover{background:rgba(48,48,50,.92)}
+#back-btn:active{transform:scale(.93)}
+#back-btn svg{width:13px;height:13px}
+#fs-btn{position:fixed;top:max(env(safe-area-inset-top,0px),8px);right:max(env(safe-area-inset-right,0px),8px);z-index:115;background:rgba(28,28,30,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 12px;border-radius:50px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;opacity:0;pointer-events:none}
+#fs-btn.vis{opacity:1;pointer-events:all}
+#fs-btn svg{width:14px;height:14px}
+/* Controller */
+#ctrl{position:fixed;bottom:0;left:0;right:0;z-index:112;padding:10px 14px;padding-bottom:max(env(safe-area-inset-bottom,0px),10px);display:none;touch-action:none;user-select:none;-webkit-user-select:none}
+#ctrl.vis{display:flex;align-items:flex-end;justify-content:space-between}
+#ctrl-toggle{position:fixed;bottom:max(calc(env(safe-area-inset-bottom,0px)+12px),14px);right:max(env(safe-area-inset-right,0px),12px);z-index:113;width:40px;height:40px;border-radius:50%;background:rgba(28,28,30,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);color:#fff;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .2s}
+#ctrl-toggle.vis{display:flex}
+#ctrl-toggle:active{transform:scale(.9)}
+#ctrl-gear{position:fixed;bottom:max(calc(env(safe-area-inset-bottom,0px)+12px),14px);right:max(calc(env(safe-area-inset-right,0px)+52px),52px);z-index:113;width:36px;height:36px;border-radius:50%;background:rgba(28,28,30,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);color:var(--muted);display:none;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+#ctrl-gear.vis{display:flex}
+#ctrl-gear:active{transform:scale(.9)}
+#ctrl-gear svg{width:16px;height:16px}
+.dpad{display:grid;grid-template-areas:'. up .''left center right''. down .';grid-template-columns:1fr 1fr 1fr;gap:4px;width:130px;height:130px;flex-shrink:0}
+.dpad-b{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.08);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;transition:background .1s,transform .1s}
+.dpad-b:active,.dpad-b.pressed{background:rgba(100,210,255,.35);transform:scale(.92)}
+.dpad-b[data-dir=up]{grid-area:up}
+.dpad-b[data-dir=down]{grid-area:down}
+.dpad-b[data-dir=left]{grid-area:left}
+.dpad-b[data-dir=right]{grid-area:right}
+.dpad-b[data-dir=center]{grid-area:center;background:rgba(255,255,255,.04);border:none;font-size:8px;color:rgba(255,255,255,.2)}
+.act-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:flex-end;max-width:180px}
+.act-b{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;transition:background .1s,transform .1s;gap:1px}
+.act-b:active,.act-b.pressed{background:rgba(100,210,255,.35);transform:scale(.92)}
+.act-b .act-key{font-size:14px;font-weight:800;color:#fff}
+.act-b .act-lbl{font-size:7px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.3px;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Controller Settings Panel */
+#ctrl-panel{position:fixed;bottom:0;left:0;right:0;z-index:120;background:rgba(28,28,30,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);border-radius:18px 18px 0 0;padding:20px 18px;padding-bottom:max(env(safe-area-inset-bottom,0px),20px);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:70vh;overflow-y:auto}
+#ctrl-panel.open{transform:translateY(0)}
+.cp-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.cp-sub{font-size:11px;color:var(--muted);margin-bottom:14px;font-weight:500}
+.cp-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px}
+.cp-row:last-child{border-bottom:none}
+.cp-row-lbl{font-size:12px;font-weight:600;flex:1}
+.cp-row-key{font-size:11px;color:var(--accent);font-weight:600;background:rgba(100,210,255,.1);padding:3px 8px;border-radius:6px}
+.cp-row select{background:var(--card);border:1px solid var(--border);color:var(--fg);padding:5px 8px;border-radius:6px;font-size:11px;font-family:inherit;font-weight:600;outline:none}
+.cp-add{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+.cp-add input{flex:1;min-width:80px;padding:7px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--fg);font-size:12px;font-family:inherit;outline:none}
+.cp-add input::placeholder{color:var(--muted)}
+.cp-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:var(--card);border:none;color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+/* Entry popup */
+#entry-popup{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;pointer-events:none}
+#entry-popup.open{opacity:1;visibility:visible;pointer-events:all}
+.ep-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center}
+.ep-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.ep-msg{font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.5;font-weight:500}
+.ep-btns{display:flex;flex-direction:column;gap:8px}
+.ep-b{padding:11px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:all .15s;width:100%}
+.ep-b:active{transform:scale(.97)}
+.ep-b.acc{background:var(--accent);color:#000}
+.ep-b.sec{background:var(--card);color:var(--fg);border:1px solid var(--border)}
+.ep-note{font-size:10px;color:var(--muted);margin-top:12px;font-weight:500}
+/* Tutorial */
+#tutorial{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;pointer-events:none}
+#tutorial.open{opacity:1;visibility:visible;pointer-events:all}
+.tut-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center}
+.tut-title{font-size:16px;font-weight:800;margin-bottom:10px}
+.tut-step{font-size:12px;color:var(--muted);line-height:1.7;font-weight:500;margin-bottom:14px;text-align:left}
+.tut-step b{color:var(--fg);font-weight:700}
+.tut-got{padding:10px 28px;border-radius:12px;background:var(--accent);color:#000;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;border:none}
+.tut-got:active{transform:scale(.96)}
+/* Confirm modal */
+#cmodal{position:fixed;inset:0;z-index:140;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;pointer-events:none}
+#cmodal.open{opacity:1;visibility:visible;pointer-events:all}
+.cm-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;max-width:300px;width:90%;text-align:center}
+.cm-title{font-size:15px;font-weight:700;margin-bottom:5px}
+.cm-msg{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;font-weight:500}
+.cm-btns{display:flex;gap:8px;justify-content:center}
+.cm-btns button{flex:1;padding:9px;border-radius:10px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:all .12s}
+.cm-btns button:active{transform:scale(.96)}
+.cm-cancel{background:var(--card);color:var(--fg)}
+.cm-confirm{background:var(--red);color:#fff}
+/* Loading */
+#loading{position:fixed;inset:0;z-index:120;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .25s}
+#loading.active{opacity:1;pointer-events:all}
+.spinner{width:28px;height:28px;border:3px solid rgba(255,255,255,.07);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#ld-name{font-size:16px;font-weight:700}
+#ld-text{font-size:11px;color:var(--muted);font-weight:500}
+/* Toast */
+.toast{position:fixed;bottom:max(calc(env(safe-area-inset-bottom,0px)+14px),22px);left:50%;transform:translateX(-50%) translateY(10px);background:rgba(44,44,46,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;padding:8px 16px;border-radius:50px;font-size:11px;font-weight:600;font-family:inherit;z-index:200;opacity:0;transition:opacity .25s,transform .25s;border:1px solid rgba(255,255,255,.06);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:768px){#sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);z-index:50}#sidebar.open{transform:translateX(0)}#menu-btn{display:flex}.clk-time{font-size:54px;letter-spacing:-2px}}
+@media(min-width:769px){.page{padding:26px 30px 70px}#sb-ov{display:none!important}}
+@media(min-width:1024px){.page{padding:30px 40px 70px}.gm-grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:9px}}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.06);border-radius:2px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
 <div id="app">
-    <!-- Background -->
-    <div id="bg-layer"><video id="bg-video" autoplay muted loop playsinline></video><img id="bg-img" alt=""></div>
-    <div id="bg-overlay"></div>
-
-    <!-- Sidebar -->
-    <nav id="sidebar" aria-label="Navigation">
-        <div class="sidebar-head">
-            <div class="sidebar-brand">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="6" width="20" height="12" rx="4"/>
-                    <line x1="7" y1="10" x2="7" y2="14"/><line x1="5" y1="12" x2="9" y2="12"/>
-                    <circle cx="15.5" cy="10.5" r="1" fill="white" stroke="none"/>
-                    <circle cx="18" cy="13" r="1" fill="white" stroke="none"/>
-                </svg>
-                <span class="sidebar-brand-name">java</span>
-            </div>
-        </div>
-        <div class="sidebar-nav">
-            <button class="nav-item active" data-page="home" onclick="navigate('home')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                <span>Home</span>
-            </button>
-            <button class="nav-item" data-page="games" onclick="navigate('games')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="7" y1="10" x2="7" y2="14"/><line x1="5" y1="12" x2="9" y2="12"/><circle cx="15.5" cy="10.5" r="1" fill="currentColor"/><circle cx="18" cy="13" r="1" fill="currentColor"/></svg>
-                <span>Games</span>
-            </button>
-            <button class="nav-item" data-page="settings" onclick="navigate('settings')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span>Settings</span>
-            </button>
-        </div>
-        <div class="sidebar-footer" id="sidebar-footer">java v1.0</div>
-    </nav>
-    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
-
-    <!-- Main -->
-    <div id="main">
-        <header class="topbar">
-            <button id="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
-            <span class="topbar-title" id="topbar-title">Home</span>
-        </header>
-        <div class="pages">
-            <!-- Home -->
-            <section class="page active" id="page-home">
-                <div class="home-center">
-                    <div class="clock-time" id="clock-time">12:00</div>
-                    <div class="clock-ampm" id="clock-ampm">PM</div>
-                    <div class="clock-date" id="clock-date"></div>
-                    <div class="battery-wrap" id="battery-wrap">
-                        <svg id="battery-icon" viewBox="0 0 28 28" fill="none">
-                            <rect x="2" y="7" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
-                            <rect x="22" y="11" width="3" height="6" rx="1" fill="currentColor" opacity="0.4"/>
-                            <rect id="battery-fill" x="4.5" y="9.5" width="15" height="9" rx="1" fill="var(--green)"/>
-                        </svg>
-                        <div>
-                            <div class="battery-pct" id="battery-pct">--%</div>
-                            <div class="battery-status" id="battery-status">Checking...</div>
-                        </div>
-                    </div>
-                    <div class="home-count" id="home-count"></div>
-                </div>
-            </section>
-
-            <!-- Games -->
-            <section class="page" id="page-games">
-                <div class="search-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" id="search-input" placeholder="Search games..." autocomplete="off" oninput="filterGames()">
-                </div>
-                <div class="games-count-bar" id="games-count-bar"></div>
-                <div class="games-grid" id="games-grid"></div>
-                <div class="no-results" id="no-results">No games found</div>
-            </section>
-
-            <!-- Settings -->
-            <section class="page" id="page-settings">
-                <div class="settings-section">
-                    <div class="settings-section-title">Appearance</div>
-                    <div class="settings-card">
-                        <div class="setting-row" style="flex-direction:column;align-items:flex-start">
-                            <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-                                <div>
-                                    <div class="setting-label">Background Media</div>
-                                    <div class="setting-sub">Set an image or video as app background</div>
-                                </div>
-                                <div class="setting-actions">
-                                    <button class="s-btn accent" onclick="document.getElementById('bg-file-input').click()">Choose File</button>
-                                    <button class="s-btn danger" onclick="removeBg()">Remove</button>
-                                </div>
-                            </div>
-                            <img class="bg-preview" id="bg-preview" alt="Background preview">
-                            <input type="file" id="bg-file-input" class="file-hidden" accept="image/*,video/*" onchange="handleBgFile(event)">
-                        </div>
-                    </div>
-                </div>
-                <div class="settings-section">
-                    <div class="settings-section-title">Data Management</div>
-                    <div class="settings-card">
-                        <div class="setting-row">
-                            <div><div class="setting-label">Export All Data</div><div class="setting-sub">Download all app data, settings, and game stats</div></div>
-                            <div class="setting-actions"><button class="s-btn accent" onclick="exportData()">Export</button></div>
-                        </div>
-                        <div class="setting-row">
-                            <div><div class="setting-label">Import Data</div><div class="setting-sub">Restore from a previously exported file</div></div>
-                            <div class="setting-actions"><button class="s-btn" onclick="document.getElementById('import-file-input').click()">Import</button></div>
-                            <input type="file" id="import-file-input" class="file-hidden" accept=".json" onchange="importData(event)">
-                        </div>
-                        <div class="setting-row">
-                            <div><div class="setting-label">Reset All Data</div><div class="setting-sub">Permanently delete all stored data</div></div>
-                            <div class="setting-actions"><button class="s-btn danger" onclick="confirmClear()">Clear All</button></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="settings-section">
-                    <div class="settings-section-title">Storage</div>
-                    <div class="settings-card">
-                        <div class="setting-row" style="flex-direction:column;align-items:flex-start">
-                            <div style="display:flex;justify-content:space-between;width:100%">
-                                <div class="setting-label">Local Storage Used</div>
-                                <div class="setting-label" id="storage-size" style="color:var(--muted);font-weight:500">--</div>
-                            </div>
-                            <div class="storage-bar"><div class="storage-fill" id="storage-fill" style="width:0%"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="settings-section">
-                    <div class="settings-section-title">About</div>
-                    <div class="settings-card">
-                        <div class="setting-row"><div class="setting-label">Version</div><div style="color:var(--muted);font-size:13px;font-weight:500">1.0.0</div></div>
-                        <div class="setting-row"><div class="setting-label">Games Available</div><div style="color:var(--muted);font-size:13px;font-weight:500" id="settings-game-count">--</div></div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
+<div id="bg-layer"><img id="bg-img" alt=""></div>
+<div id="bg-overlay"></div>
+<nav id="sidebar">
+<div class="sb-head"><div class="sb-brand"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="7" y1="10" x2="7" y2="14"/><line x1="5" y1="12" x2="9" y2="12"/><circle cx="15.5" cy="10.5" r="1" fill="white" stroke="none"/><circle cx="18" cy="13" r="1" fill="white" stroke="none"/></svg><span>java</span></div></div>
+<div class="sb-nav">
+<button class="nav-i active" data-page="home" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+<button class="nav-i" data-page="games" onclick="nav('games')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="7" y1="10" x2="7" y2="14"/><line x1="5" y1="12" x2="9" y2="12"/><circle cx="15.5" cy="10.5" r="1" fill="currentColor"/><circle cx="18" cy="13" r="1" fill="currentColor"/></svg><span>Games</span></button>
+<button class="nav-i" data-page="settings" onclick="nav('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
 </div>
-
-<!-- Loading -->
-<div id="loading" aria-live="polite">
-    <div id="loading-name"></div>
-    <div class="spinner"></div>
-    <div id="loading-text">Fetching game data...</div>
+<div class="sb-foot" id="sb-foot">java v1.0</div>
+</nav>
+<div id="sb-ov" onclick="closeSB()"></div>
+<div id="main">
+<header class="topbar"><button id="menu-btn" onclick="toggleSB()" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="tb-title" id="tb-title">Home</span></header>
+<div class="pages">
+<section class="page active" id="page-home">
+<div class="home-c">
+<div class="clk-time" id="clk-time">12:00</div>
+<div class="clk-ampm" id="clk-ampm">PM</div>
+<div class="clk-date" id="clk-date"></div>
+<div class="bat-wrap" id="bat-wrap"><svg viewBox="0 0 28 28" fill="none"><rect x="2" y="7" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/><rect x="22" y="11" width="3" height="6" rx="1" fill="currentColor" opacity=".4"/><rect id="bat-fill" x="4.5" y="9.5" width="15" height="9" rx="1" fill="var(--green)"/></svg><div><div class="bat-pct" id="bat-pct">--%</div><div class="bat-st" id="bat-st">Checking...</div></div></div>
+<div class="home-info" id="home-info"></div>
 </div>
-
-<!-- Game View -->
+</section>
+<section class="page" id="page-games">
+<div class="search-w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="search-in" placeholder="Search games..." autocomplete="off" oninput="filterG()"></div>
+<div class="gm-count" id="gm-count"></div>
+<div class="gm-grid" id="gm-grid"></div>
+<div class="no-res" id="no-res">No games found</div>
+</section>
+<section class="page" id="page-settings">
+<div class="set-sec"><div class="set-sec-t">Appearance</div><div class="set-card"><div class="set-row" style="flex-direction:column;align-items:flex-start"><div style="display:flex;align-items:center;justify-content:space-between;width:100%"><div><div class="set-lbl">Background Image</div><div class="set-sub">Set an image as app background</div></div><div class="set-acts"><button class="s-b acc" onclick="document.getElementById('bg-fi').click()">Choose</button><button class="s-b danger" onclick="rmBg()">Remove</button></div></div><img class="bg-prev" id="bg-prev" alt=""><input type="file" id="bg-fi" class="file-h" accept="image/*" onchange="handleBg(event)"></div></div></div>
+<div class="set-sec"><div class="set-sec-t">Data</div><div class="set-card">
+<div class="set-row"><div><div class="set-lbl">Export All Data</div><div class="set-sub">Download all settings, stats, controls, and stored data</div></div><div class="set-acts"><button class="s-b acc" onclick="expData()">Export</button></div></div>
+<div class="set-row"><div><div class="set-lbl">Import Data</div><div class="set-sub">Restore from a previously exported file</div></div><div class="set-acts"><button class="s-b" onclick="document.getElementById('imp-fi').click()">Import</button></div><input type="file" id="imp-fi" class="file-h" accept=".json" onchange="impData(event)"></div>
+<div class="set-row"><div><div class="set-lbl">Reset All Data</div><div class="set-sub">Permanently delete everything</div></div><div class="set-acts"><button class="s-b danger" onclick="confirmClear()">Clear All</button></div></div>
+</div></div>
+<div class="set-sec"><div class="set-sec-t">Storage</div><div class="set-card"><div class="set-row" style="flex-direction:column;align-items:flex-start"><div style="display:flex;justify-content:space-between;width:100%"><div class="set-lbl">Local Storage</div><div class="set-lbl" id="stor-size" style="color:var(--muted);font-weight:500">--</div></div><div class="stor-bar"><div class="stor-fill" id="stor-fill" style="width:0%"></div></div></div></div></div>
+<div class="set-sec"><div class="set-sec-t">About</div><div class="set-card">
+<div class="set-row"><div class="set-lbl">Version</div><div style="color:var(--muted);font-size:12px;font-weight:500">1.0.0</div></div>
+<div class="set-row"><div class="set-lbl">Games</div><div style="color:var(--muted);font-size:12px;font-weight:500" id="set-gc">--</div></div>
+<div class="set-row"><div class="set-lbl">WebGL</div><div style="color:var(--muted);font-size:12px;font-weight:500" id="set-webgl">--</div></div>
+<div class="set-row"><div class="set-lbl">Visits</div><div style="color:var(--muted);font-size:12px;font-weight:500" id="set-visits">--</div></div>
+</div></div>
+</section>
+</div>
+</div>
+</div>
+<div id="loading"><div id="ld-name"></div><div class="spinner"></div><div id="ld-text">Fetching game data...</div></div>
 <div id="game-view"><iframe id="game-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" title="Game"></iframe></div>
-<button id="back-btn" onclick="closeGame()" aria-label="Back">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    Back
-</button>
-
-<!-- Confirm Modal -->
-<div id="confirm-modal">
-    <div class="modal-box">
-        <div class="modal-title" id="modal-title">Confirm</div>
-        <div class="modal-msg" id="modal-msg">Are you sure?</div>
-        <div class="modal-btns">
-            <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-            <button class="modal-confirm" id="modal-confirm-btn" onclick="modalConfirmAction()">Confirm</button>
-        </div>
-    </div>
-</div>
+<button id="back-btn" onclick="closeGame()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+<button id="fs-btn" onclick="goFS()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+<div id="ctrl"><div class="dpad" id="dpad"><div class="dpad-b" data-dir="up">↑</div><div class="dpad-b" data-dir="left">←</div><div class="dpad-b" data-dir="center">WASD</div><div class="dpad-b" data-dir="right">→</div><div class="dpad-b" data-dir="down">↓</div></div><div class="act-btns" id="act-btns"></div></div>
+<button id="ctrl-toggle" onclick="toggleCtrl()">🎮</button>
+<button id="ctrl-gear" onclick="openCtrlPanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+<div id="ctrl-panel"><button class="cp-close" onclick="closeCtrlPanel()">✕</button><div class="cp-title" id="cp-title">Controller Settings</div><div class="cp-sub" id="cp-sub">Customize key bindings for this game</div><div id="cp-rows"></div><div class="cp-add" id="cp-add"><input type="text" id="cp-new-label" placeholder="Button label" maxlength="12"><select id="cp-new-key"></select><button class="s-b acc" onclick="addCtrlBtn()">Add</button></div></div>
+<div id="entry-popup"><div class="ep-box"><div class="ep-title" id="ep-title">Welcome to java</div><div class="ep-msg" id="ep-msg"></div><div class="ep-btns"><button class="ep-b acc" onclick="document.getElementById('ep-fi').click()">Upload Data File</button><button class="ep-b sec" onclick="closeEntry()">No Thanks</button></div><div class="ep-note">You can export your data anytime from Settings.</div><input type="file" id="ep-fi" class="file-h" accept=".json" onchange="impDataEntry(event)"></div></div>
+<div id="tutorial"><div class="tut-box"><div class="tut-title">Virtual Controller</div><div class="tut-step"><b>D-Pad</b> — Movement controls (sends both WASD and Arrow keys).<br><br><b>Action Buttons</b> — Game-specific keys shown on each button.<br><br><b>🎮 Button</b> — Tap to show or hide the controller overlay.<br><br><b>⚙ Gear</b> — Customize key bindings or add new buttons.<br><br><b>Fullscreen</b> — Use the expand icon in the top-right for landscape mode.</div><button class="tut-got" onclick="closeTut()">Got It</button></div></div>
+<div id="cmodal"><div class="cm-box"><div class="cm-title" id="cm-title">Confirm</div><div class="cm-msg" id="cm-msg">Are you sure?</div><div class="cm-btns"><button class="cm-cancel" onclick="closeCM()">Cancel</button><button class="cm-confirm" id="cm-ok" onclick="cmAction()">Confirm</button></div></div></div>
 
 <script>
-/* ══════════════════════════════════════════
-   Game Registry
-   ══════════════════════════════════════════ */
-const PACK_RAW = 'https://raw.githubusercontent.com/CoolDude2349/Offline-HTML-Games-Pack/refs/heads/master/offline/';
-const PACK_BASE = 'https://raw.githubusercontent.com/CoolDude2349/Offline-HTML-Games-Pack/refs/heads/master/offline/';
+/* ═══ Key Map ═══ */
+const KM={
+KeyW:{key:'w',code:'KeyW',kc:87},KeyA:{key:'a',code:'KeyA',kc:65},KeyS:{key:'s',code:'KeyS',kc:83},KeyD:{key:'d',code:'KeyD',kc:68},
+ArrowUp:{key:'ArrowUp',code:'ArrowUp',kc:38},ArrowDown:{key:'ArrowDown',code:'ArrowDown',kc:40},ArrowLeft:{key:'ArrowLeft',code:'ArrowLeft',kc:37},ArrowRight:{key:'ArrowRight',code:'ArrowRight',kc:39},
+Space:{key:' ',code:'Space',kc:32},Enter:{key:'Enter',code:'Enter',kc:13},ShiftLeft:{key:'Shift',code:'ShiftLeft',kc:16},ShiftRight:{key:'Shift',code:'ShiftRight',kc:16},
+ControlLeft:{key:'Control',code:'ControlLeft',kc:17},AltLeft:{key:'Alt',code:'AltLeft',kc:18},Tab:{key:'Tab',code:'Tab',kc:9},Escape:{key:'Escape',code:'Escape',kc:27},Backspace:{key:'Backspace',code:'Backspace',kc:8},
+KeyE:{key:'e',code:'KeyE',kc:69},KeyQ:{key:'q',code:'KeyQ',kc:81},KeyR:{key:'r',code:'KeyR',kc:82},KeyF:{key:'f',code:'KeyF',kc:70},
+KeyZ:{key:'z',code:'KeyZ',kc:90},KeyX:{key:'x',code:'KeyX',kc:88},KeyC:{key:'c',code:'KeyC',kc:67},KeyV:{key:'v',code:'KeyV',kc:86},
+KeyB:{key:'b',code:'KeyB',kc:66},KeyG:{key:'g',code:'KeyG',kc:71},KeyH:{key:'h',code:'KeyH',kc:72},KeyI:{key:'i',code:'KeyI',kc:73},
+KeyJ:{key:'j',code:'KeyJ',kc:74},KeyK:{key:'k',code:'KeyK',kc:75},KeyL:{key:'l',code:'KeyL',kc:76},KeyN:{key:'n',code:'KeyN',kc:78},
+KeyO:{key:'o',code:'KeyO',kc:79},KeyP:{key:'p',code:'KeyP',kc:80},KeyT:{key:'t',code:'KeyT',kc:84},KeyU:{key:'u',code:'KeyU',kc:85},KeyY:{key:'y',code:'KeyY',kc:89},
+Digit1:{key:'1',code:'Digit1',kc:49},Digit2:{key:'2',code:'Digit2',kc:50},Digit3:{key:'3',code:'Digit3',kc:51},Digit4:{key:'4',code:'Digit4',kc:52},Digit5:{key:'5',code:'Digit5',kc:53},
+Digit6:{key:'6',code:'Digit6',kc:54},Digit7:{key:'7',code:'Digit7',kc:55},Digit8:{key:'8',code:'Digit8',kc:56},Digit9:{key:'9',code:'Digit9',kc:57},Digit0:{key:'0',code:'Digit0',kc:48}
+};
+function kd(c){const m={Space:'⎵',Enter:'↵',ShiftLeft:'SHF',ShiftRight:'SHF',ControlLeft:'CTL',AltLeft:'ALT',Tab:'TAB',Escape:'ESC',Backspace:'⌫',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→'};if(m[c])return m[c];if(c.startsWith('Key'))return c.slice(3);if(c.startsWith('Digit'))return c.slice(5);return c}
 
-const games = {
-    'hollow-knight': {
-        name: 'Hollow Knight',
-        url: 'https://raw.githubusercontent.com/aukak/hollow-knight/refs/heads/main/index.html',
-        baseUrl: 'https://raw.githubusercontent.com/aukak/hollow-knight/refs/heads/main/'
-    },
-    'sm64':              { name: 'Super Mario 64',   url: PACK_RAW+'sm64.html',            baseUrl: PACK_BASE },
-    '2048':              { name: '2048',              url: PACK_RAW+'2048.html',            baseUrl: PACK_BASE },
-    'asteroids':         { name: 'Asteroids',         url: PACK_RAW+'asteroids.html',       baseUrl: PACK_BASE },
-    'breakout':          { name: 'Breakout',          url: PACK_RAW+'breakout.html',        baseUrl: PACK_BASE },
-    'cookie_clicker':    { name: 'Cookie Clicker',    url: PACK_RAW+'cookie_clicker.html',  baseUrl: PACK_BASE },
-    'doom':              { name: 'DOOM',              url: PACK_RAW+'doom.html',            baseUrl: PACK_BASE },
-    'flappy':            { name: 'Flappy Bird',       url: PACK_RAW+'flappy.html',          baseUrl: PACK_BASE },
-    'minesweeper':       { name: 'Minesweeper',       url: PACK_RAW+'minesweeper.html',     baseUrl: PACK_BASE },
-    'pacman':            { name: 'Pac-Man',           url: PACK_RAW+'pacman.html',          baseUrl: PACK_BASE },
-    'pong':              { name: 'Pong',              url: PACK_RAW+'pong.html',            baseUrl: PACK_BASE },
-    'simon':             { name: 'Simon',             url: PACK_RAW+'simon.html',           baseUrl: PACK_BASE },
-    'snake':             { name: 'Snake',             url: PACK_RAW+'snake.html',           baseUrl: PACK_BASE },
-    'solitaire':         { name: 'Solitaire',         url: PACK_RAW+'solitaire.html',       baseUrl: PACK_BASE },
-    'sudoku':            { name: 'Sudoku',            url: PACK_RAW+'sudoku.html',          baseUrl: PACK_BASE },
-    'tetris':            { name: 'Tetris',            url: PACK_RAW+'tetris.html',          baseUrl: PACK_BASE },
-    'tunnel':            { name: 'Tunnel',            url: PACK_RAW+'tunnel.html',          baseUrl: PACK_BASE }
+/* ═══ Games ═══ */
+const P='https://raw.githubusercontent.com/CoolDude2349/Offline-HTML-Games-Pack/refs/heads/master/offline/';
+const G={
+'hollow-knight':{name:'Hollow Knight',url:'https://raw.githubusercontent.com/aukak/hollow-knight/refs/heads/main/index.html',base:'https://raw.githubusercontent.com/aukak/hollow-knight/refs/heads/main/',mobile:false,btns:[['Jump','KeyZ'],['Attack','KeyX'],['Dash','KeyC'],['Spell','KeyV'],['Map','KeyM']]},
+'5minutestilldawn':{name:'5 Minutes Till Dawn',url:P+'10minutestilldawn.html',base:P,mobile:false,btns:[['Shoot','Space'],['Reload','KeyR']]},
+'badparenting':{name:'Bad Parenting',url:P+'badparenting.html',base:P,mobile:false,btns:[['Interact','KeyE'],['Run','ShiftLeft'],['Action','Space']]},
+'3dflightsim':{name:'3D Flight Simulator',url:P+'3Dflightsimulator.html',base:P,mobile:false,btns:[['Yaw L','KeyQ'],['Yaw R','KeyE'],['Up','Space'],['Down','ShiftLeft']]},
+'1v1lol':{name:'1v1.lol',url:P+'1v1.lol.html',base:P,mobile:false,btns:[['Jump','Space'],['Build','KeyG'],['Reload','KeyR']]},
+'ageofwar2':{name:'Age of War 2',url:P+'ageofwar2.html',base:P,mobile:true,btns:[]},
+'ageofwar':{name:'Age of War',url:P+'ageofwar.html',base:P,mobile:true,btns:[]},
+'angrybirds':{name:'Angry Birds',url:P+'angrybirds.html',base:P,mobile:true,btns:[]},
+'badpiggies':{name:'Bad Piggies',url:P+'badpiggies.html',base:P,mobile:true,btns:[]},
+'baldisbasics':{name:"Baldi's Basics",url:P+'baldisbasics.html',base:P,mobile:false,btns:[['Interact','KeyE'],['Run','ShiftLeft'],['Item','Space']]},
+'backrooms':{name:'Backrooms',url:P+'backrooms.html',base:P,mobile:false,btns:[['Run','ShiftLeft'],['Interact','KeyE'],['Flash','KeyF']]},
+'bitlife':{name:'Bitlife',url:P+'bitlife.html',base:P,mobile:true,btns:[]},
+'bloonstd5':{name:'Bloons TD5',url:P+'bloonsTD5.html',base:P,mobile:true,btns:[]},
+'candycrush':{name:'Candy Crush',url:P+'candycrush.html',base:P,mobile:true,btns:[]},
+'driftboss':{name:'Crossy Road',url:P+'driftboss.htm',base:P,mobile:false,btns:[]},
+'cookieclicker':{name:'Cookie Clicker',url:P+'cookieclicker.htm',base:P,mobile:true,btns:[]},
+'geometrydashlite':{name:'Geometry Dash Lite',url:P+'geometrydashlite.html',base:P,mobile:false,btns:[['Jump','Space']]}
+};
+const GC=Object.keys(G).length;
+
+/* ═══ Storage ═══ */
+const S={
+get(k,d){try{const v=localStorage.getItem('j_'+k);return v?JSON.parse(v):d}catch{return d}},
+set(k,v){try{localStorage.setItem('j_'+k,JSON.stringify(v))}catch(e){console.warn(e)}},
+rm(k){localStorage.removeItem('j_'+k)},
+all(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('j_'))o[k]=localStorage.getItem(k)}return o},
+sz(){let s=0;for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('j_'))s+=(localStorage.getItem(k)||'').length*2}return s},
+clear(){const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('j_'))ks.push(k)}ks.forEach(k=>localStorage.removeItem(k))},
+importAll(d){Object.entries(d).forEach(([k,v])=>{try{localStorage.setItem(k,v)}catch{}})}
 };
 
-const GAME_COUNT = Object.keys(games).length;
+/* ═══ Cookie helpers (for Shortcuts persistence) ═══ */
+function setCookie(n,v,days){const d=new Date();d.setTime(d.getTime()+days*864e5);document.cookie=n+'='+encodeURIComponent(v)+';expires='+d.toUTCString()+';SameSite=Lax;path=/'}
+function getCookie(n){const m=document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)'));return m?decodeURIComponent(m[2]):null}
 
-/* ══════════════════════════════════════════
-   Storage Manager
-   ══════════════════════════════════════════ */
-const Store = {
-    get(key, def) {
-        try { const v = localStorage.getItem('java_'+key); return v ? JSON.parse(v) : def; }
-        catch { return def; }
-    },
-    set(key, val) {
-        try { localStorage.setItem('java_'+key, JSON.stringify(val)); }
-        catch(e) { console.warn('Storage write failed:', e); }
-    },
-    remove(key) { localStorage.removeItem('java_'+key); },
-    getAllJavaKeys() {
-        const out = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k.startsWith('java_')) out[k] = localStorage.getItem(k);
-        }
-        return out;
-    },
-    totalSize() {
-        let s = 0;
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k.startsWith('java_')) s += (localStorage.getItem(k)||'').length * 2;
-        }
-        return s;
-    },
-    clearAll() {
-        const keys = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k.startsWith('java_')) keys.push(k);
-        }
-        keys.forEach(k => localStorage.removeItem(k));
-    },
-    importAll(data) {
-        Object.entries(data).forEach(([k,v]) => {
-            try { localStorage.setItem(k, v); } catch {}
-        });
-    }
-};
-
-/* ══════════════════════════════════════════
-   DOM References
-   ══════════════════════════════════════════ */
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('sidebar-overlay');
-const topbarTitle = document.getElementById('topbar-title');
-const loadingEl = document.getElementById('loading');
-const loadingName = document.getElementById('loading-name');
-const gameView = document.getElementById('game-view');
-const gameFrame = document.getElementById('game-frame');
-const backBtn = document.getElementById('back-btn');
-const gamesGrid = document.getElementById('games-grid');
-const searchInput = document.getElementById('search-input');
-const noResults = document.getElementById('no-results');
-const bgLayer = document.getElementById('bg-layer');
-const bgOverlay = document.getElementById('bg-overlay');
-const bgVideo = document.getElementById('bg-video');
-const bgImg = document.getElementById('bg-img');
-const bgPreview = document.getElementById('bg-preview');
-const confirmModal = document.getElementById('confirm-modal');
-
-/* ══════════════════════════════════════════
-   Populate Game Buttons
-   ══════════════════════════════════════════ */
-Object.entries(games).forEach(([id, game]) => {
-    const btn = document.createElement('button');
-    btn.className = 'game-btn';
-    btn.dataset.game = id;
-    btn.setAttribute('aria-label', 'Play ' + game.name);
-    btn.onclick = function() { launchGame(id); };
-    const name = document.createElement('span');
-    name.className = 'game-btn-name';
-    name.textContent = game.name;
-    btn.appendChild(name);
-    gamesGrid.appendChild(btn);
-});
-
-/* Update game counts */
-document.getElementById('home-count').textContent = GAME_COUNT + ' games in your library';
-document.getElementById('games-count-bar').textContent = GAME_COUNT + ' games';
-document.getElementById('settings-game-count').textContent = GAME_COUNT;
-document.getElementById('sidebar-footer').textContent = 'java v1.0 \u2022 ' + GAME_COUNT + ' games';
-
-/* ══════════════════════════════════════════
-   Navigation
-   ══════════════════════════════════════════ */
-const pageTitles = { home: 'Home', games: 'Games', settings: 'Settings' };
-
-function navigate(page) {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.page === page));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    topbarTitle.textContent = pageTitles[page] || page;
-    closeSidebar();
-    if (page === 'settings') updateStorageInfo();
-}
-
-function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); }
-function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
-
-/* ══════════════════════════════════════════
-   Clock & Battery
-   ══════════════════════════════════════════ */
-function updateClock() {
-    const now = new Date();
-    let h = now.getHours();
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12 || 12;
-    document.getElementById('clock-time').textContent = h + ':' + m;
-    document.getElementById('clock-ampm').textContent = ampm;
-    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    document.getElementById('clock-date').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
-}
-updateClock();
-setInterval(updateClock, 1000);
-
-/* Battery API */
-async function initBattery() {
-    if (!navigator.getBattery) {
-        document.getElementById('battery-pct').textContent = 'N/A';
-        document.getElementById('battery-status').textContent = 'Not supported';
-        return;
-    }
-    try {
-        const bat = await navigator.getBattery();
-        function update() {
-            const pct = Math.round(bat.level * 100);
-            document.getElementById('battery-pct').textContent = pct + '%';
-            document.getElementById('battery-status').textContent = bat.charging ? 'Charging' : 'On Battery';
-            /* Update fill width & color */
-            const fill = document.getElementById('battery-fill');
-            fill.setAttribute('width', Math.max(1, (bat.level * 15)));
-            fill.setAttribute('fill', pct <= 20 ? 'var(--red)' : pct <= 50 ? '#ffd60a' : 'var(--green)');
-        }
-        update();
-        bat.addEventListener('chargingchange', update);
-        bat.addEventListener('levelchange', update);
-    } catch {
-        document.getElementById('battery-pct').textContent = 'N/A';
-        document.getElementById('battery-status').textContent = 'Error';
-    }
-}
-initBattery();
-
-/* ══════════════════════════════════════════
-   Search
-   ══════════════════════════════════════════ */
-function filterGames() {
-    const q = searchInput.value.toLowerCase().trim();
-    const btns = gamesGrid.querySelectorAll('.game-btn');
-    let count = 0;
-    btns.forEach(btn => {
-        const name = btn.querySelector('.game-btn-name').textContent.toLowerCase();
-        const show = name.includes(q);
-        btn.style.display = show ? '' : 'none';
-        if (show) count++;
-    });
-    noResults.style.display = count === 0 ? 'block' : 'none';
-    document.getElementById('games-count-bar').textContent = count + ' game' + (count !== 1 ? 's' : '');
-}
-
-/* ══════════════════════════════════════════
-   Game Launcher
-   ══════════════════════════════════════════ */
-async function launchGame(id) {
-    const game = games[id];
-    if (!game) return;
-
-    /* Track game stats */
-    const stats = Store.get('game_stats', {});
-    if (!stats[id]) stats[id] = { plays: 0, firstPlayed: Date.now(), lastPlayed: null };
-    stats[id].plays++;
-    stats[id].lastPlayed = Date.now();
-    Store.set('game_stats', stats);
-
-    /* Show loading */
-    loadingName.textContent = game.name;
-    loadingEl.classList.add('active');
-
-    try {
-        const resp = await fetch(game.url);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        let html = await resp.text();
-
-        /* Inject <base> tag for relative asset resolution */
-        const baseTag = '<base href="' + game.baseUrl + '">';
-        if (html.indexOf('<head>') !== -1) {
-            html = html.replace('<head>', '<head>' + baseTag);
-        } else if (html.indexOf('<HEAD>') !== -1) {
-            html = html.replace('<HEAD>', '<HEAD>' + baseTag);
-        } else if (html.indexOf('<html') !== -1) {
-            html = html.replace(/<html[^>]*>/, '$&<head>' + baseTag + '</head>');
-        } else {
-            html = baseTag + html;
-        }
-
-        loadingEl.classList.remove('active');
-        gameView.classList.add('active');
-        gameFrame.srcdoc = html;
-        setTimeout(() => backBtn.classList.add('visible'), 500);
-    } catch (err) {
-        console.error('Failed to load game:', err);
-        loadingEl.classList.remove('active');
-        showToast('Could not load ' + game.name + '. Try again later.');
-    }
-}
-
-function closeGame() {
-    gameView.classList.remove('active');
-    backBtn.classList.remove('visible');
-    setTimeout(() => { gameFrame.srcdoc = ''; }, 300);
-}
-
-/* ══════════════════════════════════════════
-   Background Media
-   ══════════════════════════════════════════ */
-function applyBg(type, dataUrl) {
-    bgVideo.style.display = 'none';
-    bgVideo.src = '';
-    bgImg.style.display = 'none';
-    bgImg.src = '';
-
-    if (!type || !dataUrl) {
-        bgLayer.classList.remove('active');
-        bgOverlay.classList.remove('active');
-        bgPreview.classList.remove('active');
-        bgPreview.src = '';
-        return;
-    }
-
-    bgLayer.classList.add('active');
-    bgOverlay.classList.add('active');
-
-    if (type === 'video') {
-        bgVideo.src = dataUrl;
-        bgVideo.style.display = 'block';
-        bgVideo.play().catch(() => {});
-        bgPreview.classList.remove('active');
-    } else {
-        bgImg.src = dataUrl;
-        bgImg.style.display = 'block';
-        bgPreview.src = dataUrl;
-        bgPreview.classList.add('active');
-    }
-}
-
-function handleBgFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const isVideo = file.type.startsWith('video/');
-    const isImage = file.type.startsWith('image/');
-    if (!isVideo && !isImage) { showToast('Only image or video files are supported.'); return; }
-
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        const dataUrl = ev.target.result;
-        const type = isVideo ? 'video' : 'image';
-
-        /* Try to persist */
-        try {
-            localStorage.setItem('java_bg_media', dataUrl);
-            localStorage.setItem('java_bg_type', type);
-        } catch {
-            showToast('File too large to save permanently. It will work this session only.');
-        }
-
-        applyBg(type, dataUrl);
-
-        if (isImage) {
-            bgPreview.src = dataUrl;
-            bgPreview.classList.add('active');
-        }
-        showToast('Background updated.');
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-}
-
-function removeBg() {
-    localStorage.removeItem('java_bg_media');
-    localStorage.removeItem('java_bg_type');
-    applyBg(null, null);
-    bgPreview.classList.remove('active');
-    bgPreview.src = '';
-    showToast('Background removed.');
-}
-
-/* Restore background on load */
-(function restoreBg() {
-    try {
-        const type = localStorage.getItem('java_bg_type');
-        const media = localStorage.getItem('java_bg_media');
-        if (type && media) {
-            applyBg(type, media);
-            if (type === 'image') { bgPreview.src = media; bgPreview.classList.add('active'); }
-        }
-    } catch {}
+/* ═══ Visit Tracking ═══ */
+(function trackVisit(){
+    let v=S.get('visits',{count:0,first:null,last:null});
+    v.count++;
+    if(!v.first)v.first=Date.now();
+    v.last=Date.now();
+    S.set('visits',v);
+    setCookie('java_visits',v.count,365);
 })();
 
-/* ══════════════════════════════════════════
-   Data Export / Import / Clear
-   ══════════════════════════════════════════ */
-function exportData() {
-    const allData = Store.getAllJavaKeys();
-    /* Also grab background media if it exists */
-    const bgMedia = localStorage.getItem('java_bg_media');
-    const bgType = localStorage.getItem('java_bg_type');
-    if (bgMedia) allData['java_bg_media'] = bgMedia;
-    if (bgType) allData['java_bg_type'] = bgType;
+/* ═══ Entry Popup ═══ */
+(function showEntry(){
+    const v=S.get('visits',{count:0});
+    const isNew=v.count<=1;
+    const el=document.getElementById('entry-popup');
+    document.getElementById('ep-title').textContent=isNew?'Welcome to java':'Welcome Back';
+    document.getElementById('ep-msg').textContent=isNew?'It looks like you\'re new here! You can import previously saved data to restore your settings and game progress.':'You\'ve visited '+v.count+' times. Import saved data to restore your latest backup.';
+    setTimeout(()=>el.classList.add('open'),300);
+})();
+function closeEntry(){document.getElementById('entry-popup').classList.remove('open')}
+function impDataEntry(e){impData(e);closeEntry()}
 
-    const payload = {
-        _meta: { app: 'java', version: '1.0.0', exportedAt: new Date().toISOString(), gameCount: GAME_COUNT },
-        data: allData
-    };
+/* ═══ DOM Refs ═══ */
+const sidebar=document.getElementById('sidebar'),sbov=document.getElementById('sb-ov'),tbt=document.getElementById('tb-title');
+const ldEl=document.getElementById('loading'),ldName=document.getElementById('ld-name');
+const gv=document.getElementById('game-view'),gf=document.getElementById('game-frame'),bb=document.getElementById('back-btn'),fsb=document.getElementById('fs-btn');
+const ctrl=document.getElementById('ctrl'),ctrlTog=document.getElementById('ctrl-toggle'),ctrlGear=document.getElementById('ctrl-gear');
+const cp=document.getElementById('ctrl-panel'),cpRows=document.getElementById('cp-rows');
+const bgL=document.getElementById('bg-layer'),bgO=document.getElementById('bg-overlay'),bgI=document.getElementById('bg-img'),bgP=document.getElementById('bg-prev');
 
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'java-backup-' + Date.now() + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Data exported successfully.');
+/* ═══ Populate Games ═══ */
+const gg=document.getElementById('gm-grid');
+Object.entries(G).forEach(([id,g])=>{
+    const b=document.createElement('button');
+    b.className='gm-btn';b.dataset.id=id;
+    b.setAttribute('aria-label','Play '+g.name);
+    b.onclick=()=>launchGame(id);
+    const s=document.createElement('span');s.textContent=g.name;
+    b.appendChild(s);
+    if(g.mobile){const d=document.createElement('div');d.className='mobile-dot';b.appendChild(d)}
+    gg.appendChild(b);
+});
+document.getElementById('gm-count').textContent=GC+' games';
+document.getElementById('set-gc').textContent=GC;
+document.getElementById('sb-foot').textContent='java v1.0 \u2022 '+GC+' games';
+
+/* WebGL check */
+(function(){try{const c=document.createElement('canvas');const gl=c.getContext('webgl')||c.getContext('experimental-webgl');document.getElementById('set-webgl').textContent=gl?'Supported':'Not supported';document.getElementById('set-webgl').style.color=gl?'var(--green)':'var(--red)'}catch{document.getElementById('set-webgl').textContent='Not supported'}})();
+
+/* ═══ Navigation ═══ */
+const pt={home:'Home',games:'Games',settings:'Settings'};
+function nav(p){document.querySelectorAll('.nav-i').forEach(i=>i.classList.toggle('active',i.dataset.page===p));document.querySelectorAll('.page').forEach(p2=>p2.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');tbt.textContent=pt[p]||p;closeSB();if(p==='settings')updStor()}
+function toggleSB(){sidebar.classList.toggle('open');sbov.classList.toggle('open')}
+function closeSB(){sidebar.classList.remove('open');sbov.classList.remove('open')}
+
+/* ═══ Clock & Battery ═══ */
+function updClk(){const n=new Date();let h=n.getHours();const m=String(n.getMinutes()).padStart(2,'0');const ap=h>=12?'PM':'AM';h=h%12||12;document.getElementById('clk-time').textContent=h+':'+m;document.getElementById('clk-ampm').textContent=ap;const ds=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const ms=['January','February','March','April','May','June','July','August','September','October','November','December'];document.getElementById('clk-date').textContent=ds[n.getDay()]+', '+ms[n.getMonth()]+' '+n.getDate()}
+updClk();setInterval(updClk,1000);
+
+/* Home info */
+(function(){const v=S.get('visits',{count:0,first:null});const webgl=document.getElementById('set-webgl').textContent;document.getElementById('home-info').innerHTML=GC+' games available \u2022 WebGL: '+webgl+(v.count>1?' \u2022 Visit #'+v.count:' \u2022 First visit');document.getElementById('set-visits').textContent=v.count})();
+
+(async function(){if(!navigator.getBattery){document.getElementById('bat-pct').textContent='N/A';document.getElementById('bat-st').textContent='Not supported';return}try{const b=await navigator.getBattery();function u(){const p=Math.round(b.level*100);document.getElementById('bat-pct').textContent=p+'%';document.getElementById('bat-st').textContent=b.charging?'Charging':'On Battery';const f=document.getElementById('bat-fill');f.setAttribute('width',Math.max(1,b.level*15));f.setAttribute('fill',p<=20?'var(--red)':p<=50?'#ffd60a':'var(--green)')}u();b.addEventListener('chargingchange',u);b.addEventListener('levelchange',u)}catch{document.getElementById('bat-pct').textContent='N/A';document.getElementById('bat-st').textContent='Error'}})();
+
+/* ═══ Search ═══ */
+function filterG(){const q=document.getElementById('search-in').value.toLowerCase().trim();const bs=gg.querySelectorAll('.gm-btn');let c=0;bs.forEach(b=>{const n=b.querySelector('span').textContent.toLowerCase();const s=n.includes(q);b.style.display=s?'':'none';if(s)c++});document.getElementById('no-results').style.display=c===0?'block':'none';document.getElementById('gm-count').textContent=c+' game'+(c!==1?'s':'')}
+
+/* ═══ Background ═══ */
+function applyBg(du){if(!du){bgL.classList.remove('active');bgO.classList.remove('active');bgI.src='';bgP.classList.remove('active');bgP.src='';return}bgL.classList.add('active');bgO.classList.add('active');bgI.src=du;bgP.src=du;bgP.classList.add('active')}
+function handleBg(e){const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')){toast('Only images supported.');return}const r=new FileReader();r.onload=function(ev){const du=ev.target.result;try{localStorage.setItem('j_bg',du)}catch{toast('Image too large to save permanently. Works this session only.')}applyBg(du);toast('Background updated.')};r.readAsDataURL(f);e.target.value=''}
+function rmBg(){localStorage.removeItem('j_bg');applyBg(null);toast('Background removed.')}
+(function(){try{const b=localStorage.getItem('j_bg');if(b)applyBg(b)}catch{}})();
+
+/* ═══ Export / Import ═══ */
+function expData(){const d=S.all();const bg=localStorage.getItem('j_bg');if(bg)d['j_bg']=bg;const ctrlData={};Object.keys(G).forEach(id=>{const c=localStorage.getItem('j_ctrl_'+id);if(c)ctrlData['j_ctrl_'+id]=c});Object.assign(d,ctrlData);const pl={_meta:{app:'java',ver:'1.0.0',at:new Date().toISOString(),games:GC},data:d};const bl=new Blob([JSON.stringify(pl)],{type:'application/json'});const u=URL.createObjectURL(bl);const a=document.createElement('a');a.href=u;a.download='java-backup-'+Date.now()+'.json';a.click();URL.revokeObjectURL(u);toast('Data exported.')}
+function impData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const pl=JSON.parse(ev.target.result);if(!pl.data)throw 0;S.importAll(pl.data);const bg=localStorage.getItem('j_bg');if(bg)applyBg(bg);updStor();toast('Data imported. Refresh for full effect.')}catch{toast('Import failed: invalid file.')}};r.readAsText(f);e.target.value=''}
+function updStor(){const b=S.sz();const kb=(b/1024).toFixed(1);document.getElementById('stor-size').textContent=kb+' KB';document.getElementById('stor-fill').style.width=Math.min(100,b/(5*1024*1024)*100)+'%'}
+updStor();
+
+/* ═══ Confirm Modal ═══ */
+let _cmA=null;
+function confirmClear(){document.getElementById('cm-title').textContent='Reset All Data';document.getElementById('cm-msg').textContent='This permanently deletes all your settings, game stats, controls, and backgrounds. This cannot be undone.';_cmA=()=>{S.clear();localStorage.removeItem('j_bg');applyBg(null);updStor();toast('All data cleared.')};document.getElementById('cmodal').classList.add('open')}
+function cmAction(){if(_cmA)_cmA();_cmA=null;closeCM()}
+function closeCM(){document.getElementById('cmodal').classList.remove('open');_cmA=null}
+
+/* ═══ Virtual Controller ═══ */
+let curGame=null,ctrlVis=false;
+
+/* Build key select options */
+(function(){const sel=document.getElementById('cp-new-key');Object.keys(KM).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=kd(c);sel.appendChild(o)})})();
+
+function sendKey(code,type){
+    const k=KM[code];if(!k)return;
+    const msg={type:'java-key',eventType:type,key:k.key,code:k.code,kc:k.kc};
+    try{gf.contentWindow.postMessage(msg,'*')}catch{}
 }
 
-function importData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        try {
-            const payload = JSON.parse(ev.target.result);
-            if (!payload.data || typeof payload.data !== 'object') throw new Error('Invalid format');
-            Store.importAll(payload.data);
-
-            /* Re-apply background */
-            const type = localStorage.getItem('java_bg_type');
-            const media = localStorage.getItem('java_bg_media');
-            if (type && media) applyBg(type, media);
-
-            updateStorageInfo();
-            showToast('Data imported successfully. Some changes may need a refresh.');
-        } catch (err) {
-            showToast('Import failed: invalid file format.');
-        }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-}
-
-/* ══════════════════════════════════════════
-   Confirm Modal
-   ══════════════════════════════════════════ */
-let pendingModalAction = null;
-
-function confirmClear() {
-    document.getElementById('modal-title').textContent = 'Reset All Data';
-    document.getElementById('modal-msg').textContent = 'This will permanently delete all your settings, game stats, backgrounds, and any other stored data. This cannot be undone.';
-    pendingModalAction = function() {
-        Store.clearAll();
-        /* Also clear bg media keys */
-        localStorage.removeItem('java_bg_media');
-        localStorage.removeItem('java_bg_type');
-        applyBg(null, null);
-        bgPreview.classList.remove('active');
-        bgPreview.src = '';
-        updateStorageInfo();
-        showToast('All data has been cleared.');
-    };
-    confirmModal.classList.add('open');
-}
-
-function modalConfirmAction() {
-    if (pendingModalAction) pendingModalAction();
-    pendingModalAction = null;
-    closeModal();
-}
-
-function closeModal() {
-    confirmModal.classList.remove('open');
-    pendingModalAction = null;
-}
-
-/* ══════════════════════════════════════════
-   Storage Info
-   ══════════════════════════════════════════ */
-function updateStorageInfo() {
-    const bytes = Store.totalSize();
-    const kb = (bytes / 1024).toFixed(1);
-    const maxMB = 5;
-    const pct = Math.min(100, (bytes / (maxMB * 1024 * 1024)) * 100);
-    document.getElementById('storage-size').textContent = kb + ' KB';
-    document.getElementById('storage-fill').style.width = pct + '%';
-}
-updateStorageInfo();
-
-/* ══════════════════════════════════════════
-   Toast
-   ══════════════════════════════════════════ */
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    requestAnimationFrame(() => t.classList.add('show'));
-    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 250); }, 2800);
-}
-
-/* ══════════════════════════════════════════
-   Keyboard & Touch
-   ══════════════════════════════════════════ */
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        if (confirmModal.classList.contains('open')) closeModal();
-        else if (gameView.classList.contains('active')) closeGame();
-    }
+/* D-Pad events */
+const dpadMap={up:['KeyW','ArrowUp'],down:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight']};
+document.querySelectorAll('.dpad-b').forEach(b=>{
+    const dir=b.dataset.dir;if(dir==='center')return;
+    const keys=dpadMap[dir];if(!keys)return;
+    function dn(e){e.preventDefault();keys.forEach(k=>sendKey(k,'keydown'));b.classList.add('pressed')}
+    function up(e){e.preventDefault();keys.forEach(k=>sendKey(k,'keyup'));b.classList.remove('pressed')}
+    b.addEventListener('pointerdown',dn);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up)
 });
 
-let touchStartY = 0;
-gameView.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
-gameView.addEventListener('touchend', e => {
-    if (e.changedTouches[0].clientY - touchStartY > 100 && touchStartY < 80) closeGame();
-}, { passive: true });
+/* Build action buttons for current game */
+function buildActBtns(id){
+    const g=G[id];if(!g)return;
+    const cont=document.getElementById('act-btns');cont.innerHTML='';
+    /* Merge default + custom controls */
+    const custom=S.get('ctrl_'+id,null);
+    let btns=g.btns||[];
+    if(custom&&custom.btns)btns=custom.btns;
+    btns.forEach((b,i)=>{
+        const el=document.createElement('div');el.className='act-b';el.dataset.code=b[1];el.dataset.idx=i;
+        const ky=document.createElement('div');ky.className='act-key';ky.textContent=kd(b[1]);
+        const lb=document.createElement('div');lb.className='act-lbl';lb.textContent=b[0];
+        el.appendChild(ky);el.appendChild(lb);
+        function dn(e){e.preventDefault();sendKey(b[1],'keydown');el.classList.add('pressed')}
+        function up(e){e.preventDefault();sendKey(b[1],'keyup');el.classList.remove('pressed')}
+        el.addEventListener('pointerdown',dn);el.addEventListener('pointerup',up);el.addEventListener('pointerleave',up);el.addEventListener('pointercancel',up);
+        cont.appendChild(el)
+    })
+}
 
-/* Set a session cookie to mark visit */
-document.cookie = 'java_visited=1;max-age=31536000;SameSite=Lax;path=/';
+function toggleCtrl(){ctrlVis=!ctrlVis;ctrl.classList.toggle('vis',ctrlVis)}
+
+/* Controller settings panel */
+function openCtrlPanel(){
+    if(!curGame)return;
+    const g=G[curGame];
+    document.getElementById('cp-title').textContent=g.name+' Controls';
+    document.getElementById('cp-sub').textContent='D-Pad always sends WASD + Arrow keys. Customize action buttons below.';
+    cpRows.innerHTML='';
+    const custom=S.get('ctrl_'+curGame,null);
+    let btns=g.btns||[];
+    if(custom&&custom.btns)btns=custom.btns;
+    btns.forEach((b,i)=>{
+        const row=document.createElement('div');row.className='cp-row';
+        const lbl=document.createElement('div');lbl.className='cp-row-lbl';lbl.textContent=b[0];
+        const sel=document.createElement('select');
+        Object.keys(KM).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=kd(c);if(c===b[1])o.selected=true;sel.appendChild(o)});
+        sel.onchange=()=>{btns[i][1]=sel.value;S.set('ctrl_'+curGame,{btns});buildActBtns(curGame)};
+        const rm=document.createElement('button');rm.className='s-b danger';rm.textContent='Remove';rm.style.fontSize='10px';rm.style.padding='4px 8px';
+        rm.onclick=()=>{btns.splice(i,1);S.set('ctrl_'+curGame,{btns});buildActBtns(curGame);openCtrlPanel()};
+        row.appendChild(lbl);row.appendChild(sel);row.appendChild(rm);
+        cpRows.appendChild(row)
+    });
+    cp.classList.add('open')
+}
+function closeCtrlPanel(){cp.classList.remove('open')}
+function addCtrlBtn(){
+    if(!curGame)return;
+    const lbl=document.getElementById('cp-new-label').value.trim();
+    const key=document.getElementById('cp-new-key').value;
+    if(!lbl){toast('Enter a label.');return}
+    const custom=S.get('ctrl_'+curGame,null);
+    let btns=custom&&custom.btns?custom.btns:[...(G[curGame].btns||[])];
+    btns.push([lbl,key]);
+    S.set('ctrl_'+curGame,{btns});
+    document.getElementById('cp-new-label').value='';
+    buildActBtns(curGame);openCtrlPanel();toast('Button added.')
+}
+
+/* ═══ Tutorial ═══ */
+function showTut(){
+    const seen=S.get('tut_seen',false);
+    if(!seen){document.getElementById('tutorial').classList.add('open');S.set('tut_seen',true)}
+}
+function closeTut(){document.getElementById('tutorial').classList.remove('open')}
+
+/* ═══ Fullscreen ═══ */
+function goFS(){
+    const el=document.documentElement;
+    if(el.requestFullscreen)el.requestFullscreen();
+    else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
+    try{screen.orientation.lock('landscape').catch(()=>{})}catch{}
+}
+
+/* ═══ Launch Game ═══ */
+async function launchGame(id){
+    const g=G[id];if(!g)return;
+    curGame=id;
+    /* Track stats */
+    const st=S.get('gstats',{});
+    if(!st[id])st[id]={plays:0,first:Date.now(),last:null};
+    st[id].plays++;st[id].last=Date.now();
+    S.set('gstats',st);
+    /* Loading */
+    ldName.textContent=g.name;ldEl.classList.add('active');
+    try{
+        const resp=await fetch(g.url);
+        if(!resp.ok)throw new Error('HTTP '+resp.status);
+        let html=await resp.text();
+        /* Inject <base> + keyboard listener */
+        const inject=`<base href="${g.base}"><script>(function(){window.addEventListener('message',function(e){if(!e.data||e.data.type!=='java-key')return;var d=e.data;try{var ev=new KeyboardEvent(d.eventType,{key:d.key,code:d.code,keyCode:d.kc,which:d.kc,bubbles:true,cancelable:true});document.dispatchEvent(ev)}catch(err){}})})()</script>`;
+        if(html.indexOf('<head>')!==-1)html=html.replace('<head>','<head>'+inject);
+        else if(html.indexOf('<HEAD>')!==-1)html=html.replace('<HEAD>','<HEAD>'+inject);
+        else if(html.indexOf('<html')!==-1)html=html.replace(/<html[^>]*>/,'$&<head>'+inject+'</head>');
+        else html=inject+html;
+
+        ldEl.classList.remove('active');
+        gv.classList.add('active');
+        gf.srcdoc=html;
+        setTimeout(()=>{bb.classList.add('vis');fsb.classList.add('vis');ctrlTog.classList.add('vis');ctrlGear.classList.add('vis')},500);
+
+        /* Setup controller */
+        buildActBtns(id);
+        /* Show controller by default for non-mobile games, hidden for mobile games */
+        if(g.mobile){ctrlVis=false;ctrl.classList.remove('vis')}
+        else{ctrlVis=true;ctrl.classList.add('vis')}
+
+        /* Show tutorial on first game visit */
+        const gTutSeen=S.get('gtut_'+id,false);
+        if(!gTutSeen&&g.btns.length>0){showTut();S.set('gtut_'+id,true)}
+    }catch(err){
+        console.error(err);ldEl.classList.remove('active');toast('Could not load '+g.name+'.')
+    }
+}
+
+function closeGame(){
+    gv.classList.remove('active');bb.classList.remove('vis');fsb.classList.remove('vis');
+    ctrlTog.classList.remove('vis');ctrlGear.classList.remove('vis');ctrl.classList.remove('vis');
+    ctrlVis=false;curGame=null;closeCtrlPanel();
+    try{if(document.fullscreenElement)document.exitFullscreen()}catch{}
+    setTimeout(()=>{gf.srcdoc=''},300)
+}
+
+/* ═══ Toast ═══ */
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),250)},2600)}
+
+/* ═══ Keyboard ═══ */
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.getElementById('cmodal').classList.contains('open'))closeCM();else if(document.getElementById('tutorial').classList.contains('open'))closeTut();else if(cp.classList.contains('open'))closeCtrlPanel();else if(gv.classList.contains('active'))closeGame()}});
+
+/* ═══ Touch: swipe down from top to close game ═══ */
+let tsy=0;gv.addEventListener('touchstart',e=>{tsy=e.touches[0].clientY},{passive:true});gv.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-tsy>100&&tsy<80)closeGame()},{passive:true});
 </script>
 </body>
 </html>
