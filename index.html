@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
+    <title>java</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #141416;
+            --surface: #1c1c1e;
+            --card: #222224;
+            --card-hover: #2c2c2e;
+            --border: rgba(255,255,255,0.06);
+            --fg: #f5f5f7;
+            --muted: #7c7c80;
+            --accent: #64d2ff;
+            --sidebar-w: 230px;
+            --topbar-h: 54px;
+            --radius: 14px;
+            --radius-sm: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+        }
+
+        body {
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        #app { height: 100%; display: flex; }
+
+        /* ─── Sidebar ─── */
+        #sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 50;
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+            overflow-y: auto;
+        }
+
+        .sidebar-head {
+            padding: 22px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-brand svg { width: 28px; height: 28px; flex-shrink: 0; }
+
+        .sidebar-brand-name {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-nav { padding: 12px 10px; flex: 1; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            margin-bottom: 2px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--fg); }
+        .nav-item.active { background: rgba(100,210,255,0.1); color: var(--accent); }
+        .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: rgba(255,255,255,0.15);
+        }
+
+        /* ─── Sidebar Overlay (mobile) ─── */
+        #sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 40;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: none;
+        }
+
+        #sidebar-overlay.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        /* ─── Main Area ─── */
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            height: 100%;
+        }
+
+        /* ─── Top Bar ─── */
+        .topbar {
+            height: var(--topbar-h);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            gap: 10px;
+        }
+
+        #menu-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: var(--fg);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+
+        #menu-btn:hover { background: rgba(255,255,255,0.06); }
+        #menu-btn svg { width: 22px; height: 22px; }
+
+        .topbar-title { font-size: 15px; font-weight: 700; }
+
+        /* ─── Pages ─── */
+        .pages {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            padding: 28px 22px 80px;
+            animation: pageIn 0.22s ease;
+            position: relative;
+        }
+
+        .page.active { display: block; }
+
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── Home Page ─── */
+        .home-welcome h2 {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .home-welcome p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* Subtle ambient glow on home */
+        .home-glow {
+            position: absolute;
+            top: -80px;
+            right: -60px;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(100,210,255,0.035) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            margin: 28px 0 14px;
+        }
+
+        /* ─── Games Page ─── */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 22px;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 17px;
+            height: 17px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--fg);
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--muted); }
+        #search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(100,210,255,0.12); }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 10px;
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--muted);
+            padding: 40px 0;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+
+        /* ─── Game Button ─── */
+        .game-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            font-family: inherit;
+            color: var(--fg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .game-btn:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .game-btn:active {
+            transform: scale(0.97);
+            transition: transform 0.08s;
+        }
+
+        .game-btn:focus-visible { box-shadow: 0 0 0 3px var(--accent); }
+
+        .game-btn-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--surface);
+        }
+
+        .game-btn-name {
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ─── Game View ─── */
+        #game-view {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: #000;
+            opacity: 0;
+            transform: scale(1.02);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        #game-view.active { opacity: 1; transform: scale(1); pointer-events: all; }
+
+        #game-frame { width: 100%; height: 100%; border: none; background: #000; }
+
+        /* ─── Back Button ─── */
+        #back-btn {
+            position: fixed;
+            top: max(env(safe-area-inset-top, 0px), 10px);
+            left: max(env(safe-area-inset-left, 0px), 10px);
+            z-index: 110;
+            background: rgba(28,28,30,0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s, transform 0.12s, opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #back-btn.visible { opacity: 1; pointer-events: all; }
+        #back-btn:hover { background: rgba(48,48,50,0.92); }
+        #back-btn:active { transform: scale(0.93); }
+        #back-btn svg { width: 15px; height: 15px; }
+
+        /* ─── Loading ─── */
+        #loading {
+            position: fixed;
+            inset: 0;
+            z-index: 120;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        #loading.active { opacity: 1; pointer-events: all; }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255,255,255,0.07);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #loading-name { font-size: 18px; font-weight: 700; }
+        #loading-text { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+        /* ─── Toast ─── */
+        .toast {
+            position: fixed;
+            bottom: max(calc(env(safe-area-inset-bottom, 0px) + 16px), 24px);
+            left: 50%;
+            transform: translateX(-50%) translateY(12px);
+            background: rgba(44,44,46,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.25s;
+            border: 1px solid rgba(255,255,255,0.06);
+            white-space: nowrap;
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                left: 0; top: 0;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            #sidebar.open { transform: translateX(0); }
+            #menu-btn { display: flex; }
+        }
+
+        @media (min-width: 769px) {
+            .page { padding: 32px 36px 80px; }
+            #menu-btn { display: none !important; }
+            #sidebar-overlay { display: none !important; }
+        }
+
+        @media (min-width: 1024px) {
+            .page { padding: 36px 48px 80px; }
+            .games-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 2px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <nav id="sidebar" aria-label="Main navigation">
+            <div class="sidebar-head">
+                <div class="sidebar-brand">
+                    <!-- White gaming controller, no background -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="6" width="20" height="12" rx="4"/>
+                        <line x1="7" y1="10" x2="7" y2="14"/>
+                        <line x1="5" y1="12" x2="9" y2="12"/>
+                        <circle cx="15.5" cy="10.5" r="1" fill="white" stroke="none"/>
+                        <circle cx="18" cy="13" r="1" fill="white" stroke="none"/>
+                    </svg>
+                    <span class="sidebar-brand-name">java</span>
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <button class="nav-item active" data-page="home" onclick="navigate('home')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <span>Home</span>
+                </button>
+                <button class="nav-item" data-page="games" onclick="navigate('games')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="6" width="20" height="12" rx="4"/>
+                        <line x1="7" y1="10" x2="7" y2="14"/>
+                        <line x1="5" y1="12" x2="9" y2="12"/>
+                        <circle cx="15.5" cy="10.5" r="1" fill="currentColor"/>
+                        <circle cx="18" cy="13" r="1" fill="currentColor"/>
+                    </svg>
+                    <span>Games</span>
+                </button>
+            </div>
+            <div class="sidebar-footer">java v1.0</div>
+        </nav>
+
+        <!-- Sidebar overlay (mobile) -->
+        <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+        <!-- Main content area -->
+        <div id="main">
+            <!-- Top bar -->
+            <header class="topbar">
+                <button id="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+                <span class="topbar-title" id="topbar-title">Home</span>
+            </header>
+
+            <!-- Page container -->
+            <div class="pages">
+                <!-- Home -->
+                <section class="page active" id="page-home">
+                    <div class="home-glow"></div>
+                    <div class="home-welcome">
+                        <h2>Welcome to java</h2>
+                        <p>Pick a game and start playing instantly. No downloads, no installs.</p>
+                    </div>
+                    <div class="section-title">Quick Play</div>
+                    <div class="games-grid" id="home-games"></div>
+                </section>
+
+                <!-- Games -->
+                <section class="page" id="page-games">
+                    <div class="search-wrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Search games..." autocomplete="off" oninput="filterGames()">
+                    </div>
+                    <div class="games-grid" id="games-grid"></div>
+                    <div class="no-results" id="no-results">No games found</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="loading" aria-live="polite">
+        <div id="loading-name"></div>
+        <div class="spinner"></div>
+        <div id="loading-text">Fetching game data...</div>
+    </div>
+
+    <!-- Full-screen game iframe -->
+    <div id="game-view">
+        <iframe id="game-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" title="Game"></iframe>
+    </div>
+
+    <!-- Back button (inside game view) -->
+    <button id="back-btn" onclick="closeGame()" aria-label="Return to library">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back
+    </button>
+
+    <script>
+        /* ── Game registry ── */
+        const games = {
+            'hollow-knight': {
+                name: 'Hollow Knight',
+                icon: 'https://upload.wikimedia.org/wikipedia/en/2/2f/Hollow_Knight_cover.jpg',
+                fallbackIcon: 'https://picsum.photos/seed/hknight/56/56.jpg',
+                url: 'https://raw.githubusercontent.com/aukak/hollow-knight/refs/heads/main/index.html',
+                baseUrl: 'https://aukak.github.io/hollow-knight/'
+            },
+            'super-mario-64': {
+                name: 'Super Mario 64',
+                icon: 'https://nintendocore.org/cdn/shop/products/Super-Mario-64-1.png?v=1568966086',
+                fallbackIcon: 'https://picsum.photos/seed/sm64icon/56/56.jpg',
+                url: 'https://raw.githubusercontent.com/CoolDude2349/Offline-HTML-Games-Pack/refs/heads/master/offline/sm64.html',
+                baseUrl: 'https://cooldude2349.github.io/Offline-HTML-Games-Pack/offline/'
+            }
+        };
+
+        /* ── DOM references ── */
+        const sidebar     = document.getElementById('sidebar');
+        const overlay     = document.getElementById('sidebar-overlay');
+        const topbarTitle = document.getElementById('topbar-title');
+        const loadingEl   = document.getElementById('loading');
+        const loadingName = document.getElementById('loading-name');
+        const gameView    = document.getElementById('game-view');
+        const gameFrame   = document.getElementById('game-frame');
+        const backBtn     = document.getElementById('back-btn');
+        const homeGrid    = document.getElementById('home-games');
+        const gamesGrid   = document.getElementById('games-grid');
+        const searchInput = document.getElementById('search-input');
+        const noResults   = document.getElementById('no-results');
+
+        /* ── Create a game button element ── */
+        function createGameBtn(id, game) {
+            const btn = document.createElement('button');
+            btn.className = 'game-btn';
+            btn.dataset.game = id;
+            btn.setAttribute('aria-label', 'Play ' + game.name);
+            btn.onclick = function() { launchGame(id); };
+
+            const icon = document.createElement('img');
+            icon.className = 'game-btn-icon';
+            icon.src = game.icon;
+            icon.alt = '';
+            icon.onerror = function() { this.src = game.fallbackIcon; };
+
+            const name = document.createElement('span');
+            name.className = 'game-btn-name';
+            name.textContent = game.name;
+
+            btn.appendChild(icon);
+            btn.appendChild(name);
+            return btn;
+        }
+
+        /* Populate game buttons on both pages */
+        Object.entries(games).forEach(function(entry) {
+            homeGrid.appendChild(createGameBtn(entry[0], entry[1]));
+            gamesGrid.appendChild(createGameBtn(entry[0], entry[1]));
+        });
+
+        /* ── Page navigation ── */
+        var pageTitles = { home: 'Home', games: 'Games' };
+
+        function navigate(page) {
+            /* Highlight active sidebar item */
+            document.querySelectorAll('.nav-item').forEach(function(item) {
+                item.classList.toggle('active', item.dataset.page === page);
+            });
+            /* Switch visible page */
+            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            document.getElementById('page-' + page).classList.add('active');
+            /* Update topbar */
+            topbarTitle.textContent = pageTitles[page] || page;
+            /* Close sidebar on mobile */
+            closeSidebar();
+        }
+
+        /* ── Sidebar toggle ── */
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        /* ── Search filter ── */
+        function filterGames() {
+            var q = searchInput.value.toLowerCase().trim();
+            var btns = gamesGrid.querySelectorAll('.game-btn');
+            var count = 0;
+            btns.forEach(function(btn) {
+                var name = btn.querySelector('.game-btn-name').textContent.toLowerCase();
+                var show = name.indexOf(q) !== -1;
+                btn.style.display = show ? '' : 'none';
+                if (show) count++;
+            });
+            noResults.style.display = count === 0 ? 'block' : 'none';
+        }
+
+        /* ── Launch game: fetch raw HTML, inject <base>, render in iframe ── */
+        async function launchGame(id) {
+            var game = games[id];
+            if (!game) return;
+
+            loadingName.textContent = game.name;
+            loadingEl.classList.add('active');
+
+            try {
+                var resp = await fetch(game.url);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                var html = await resp.text();
+
+                /* Inject <base> so relative URLs in the fetched HTML resolve correctly */
+                var baseTag = '<base href="' + game.baseUrl + '">';
+                if (html.indexOf('<head>') !== -1) {
+                    html = html.replace('<head>', '<head>' + baseTag);
+                } else if (html.indexOf('<HEAD>') !== -1) {
+                    html = html.replace('<HEAD>', '<HEAD>' + baseTag);
+                } else if (html.indexOf('<html') !== -1) {
+                    html = html.replace(/<html[^>]*>/, '$&<head>' + baseTag + '</head>');
+                } else {
+                    html = baseTag + html;
+                }
+
+                loadingEl.classList.remove('active');
+                gameView.classList.add('active');
+                gameFrame.srcdoc = html;
+                setTimeout(function() { backBtn.classList.add('visible'); }, 500);
+
+            } catch (err) {
+                console.error('Failed to load game:', err);
+                loadingEl.classList.remove('active');
+                showToast('Could not load the game. Try again later.');
+            }
+        }
+
+        /* ── Close game ── */
+        function closeGame() {
+            gameView.classList.remove('active');
+            backBtn.classList.remove('visible');
+            setTimeout(function() { gameFrame.srcdoc = ''; }, 300);
+        }
+
+        /* ── Toast notifications ── */
+        function showToast(msg) {
+            var t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            requestAnimationFrame(function() { t.classList.add('show'); });
+            setTimeout(function() {
+                t.classList.remove('show');
+                setTimeout(function() { t.remove(); }, 250);
+            }, 3000);
+        }
+
+        /* ── Keyboard: Escape closes game ── */
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && gameView.classList.contains('active')) {
+                closeGame();
+            }
+        });
+
+        /* ── Mobile: swipe down from top to close game ── */
+        var touchStartY = 0;
+        gameView.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        gameView.addEventListener('touchend', function(e) {
+            var dy = e.changedTouches[0].clientY - touchStartY;
+            if (dy > 100 && touchStartY < 80) closeGame();
+        }, { passive: true });
+    </script>
+</body>
+</html>
